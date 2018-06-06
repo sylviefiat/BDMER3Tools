@@ -11,9 +11,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.18.0",
+    "bcryptjs": "^2.4.3",
+    "blob": "0.0.4",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
+    "csv-parse": "^2.4.0",
     "express": "^4.16.3",
-    "morgan": "^1.9.0"
+    "jsonwebtoken": "^8.2.2",
+    "morgan": "^1.9.0",
+    "pg": "^7.4.3",
+    "pg-structure": "^4.1.2",
+    "pouchdb": "^6.4.3",
+    "pouchdb-authentication": "^1.1.3"
   }
 }
