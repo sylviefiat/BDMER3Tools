@@ -16,7 +16,7 @@ Vue.use(Vuetify)
 Vue.use(Vuelidate)
 Vue.use(VueI18n)
 
-const locale = 'fr'
+const locale = 'en'
 
 const messages = {
     fr: require("./language/fr.json"),
@@ -27,6 +27,15 @@ const i18n = new VueI18n({
     locale,
     messages
 })
+
+Vue.prototype.$locale = {
+	change (language) {
+		i18n.locale = language;
+	},
+	current () {
+		return i18n.locale;
+	}
+};
 
 /* eslint-disable no-new */
 new Vue({

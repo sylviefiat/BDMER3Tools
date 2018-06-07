@@ -1,26 +1,45 @@
 <template>
-  <v-container grid-list-md text-xs-center>
-    <v-layout row wrap>
-      <v-flex xs10 offset-xs1>
-        <v-form ref="form" v-model="valid" lazy-validation>
+  <v-container fluid fill-height>
+    <v-layout align-center justify-center>
+      <v-flex md4 sm6 xs10>
+        <div class="headline">
+          {{ $t("STEP") }}1 :
+            {{ $t("CONNECT_TO") }} <span class="blue--text">ODK</span>.
+            <img v-if="language !== 'en'" @click="changeLanguage('en')" class="lang" src="../../assets/en.png">
+            <img v-if="language !== 'fr'" @click="changeLanguage('fr')" class="lang" src="../../assets/fr.png">
+        </div>
 
-          <v-text-field v-model="user.mail"
-          label="E-mail"
-          :error-messages="errors.passwordErrors"
-          required></v-text-field>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-text-field
+         prepend-icon="link"
+         v-model="user.url"
+         label="Url "
+         :error-messages="hasUrlError"
+         @input="$v.user.url.$touch()"
+         @blur="$v.user.url.$touch()"
+         required></v-text-field>
+
+          <v-text-field v-model="user.username"
+         :label="$t('USERNAME')"
+         prepend-icon="person"
+         :error-messages="hasUsernameError"
+         @input="$v.user.username.$touch()"
+         @blur="$v.user.username.$touch()"
+         required></v-text-field>
 
           <v-text-field single-line
+          prepend-icon="lock"
+          :error-messages="hasPasswordError"
+          @input="$v.user.password.$touch()"
+          @blur="$v.user.password.$touch()"
           :append-icon="e1 ? 'visibility' : 'visibility_off'"
           :append-icon-cb="() => (e1 = !e1)"
           :type="e1 ? 'password' : 'text'"
           v-model="user.password"
-          label="Mot de passe"
-          :error-messages="errors.passwordErrors"
+          :label="$t('PASSWORD')"
           required></v-text-field>
 
-          <v-btn :disabled="!valid" @click="submit">S'inscrire</v-btn>
-          <v-btn @click="clear">clear</v-btn>
-
+          <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
         </v-form>
       </v-flex>
     </v-layout>
@@ -29,31 +48,96 @@
 
 <script>
 import store from '@/store'
+import { required } from 'vuelidate/lib/validators'
 
 export default {
   data: () => ({
     e1: true,
-    e2: true,
-    user:{
-      mail: "",
-      password: "",
+    user: {
+      url: "193.51.249.49",
+      username: "postgres",
+      password: "docker"
     },
+    usernames: [],
+    mails: [],
     valid: true,
-    errors:{
-      mailErrors: "",
-      passwordError: ""
-    }
+    errorUrl: [],
+    errorAuth: [],
+    language: ""
   }),
-
-  methods: {
-    submit () {
-      if (this.$refs.form.validate()) {
-        this.$store.dispatch('account/signup', this.newUser)
+  validations: {
+    user: {
+      url: {
+        required
+      },
+      username: {
+        required
+      },
+      password: {
+        required
       }
+    }
+  },
+  computed: {
+    isCompleted() {
+      return this.user.username && this.user.password && this.user.url;
     },
-    clear () {
-      this.$refs.form.reset();
+    hasUrlError() {
+      let errors = []
+      if (!this.$v.user.url.$dirty) return errors
+      !this.$v.user.url.required && errors.push(this.$i18n.t("REQUIRED"))
+      if(this.$store.getters['signin/hasUrlError']){
+        errors.push(this.$i18n.t("URL_ERROR"))
+        this.$store.dispatch('signin/resetUrlError')
+      }
+      return errors
+    },
+    hasUsernameError() {
+      let errors = []
+      if (!this.$v.user.username.$dirty) return errors
+      !this.$v.user.username.required && errors.push(this.$i18n.t("REQUIRED"))
+      if(this.$store.getters['signin/hasAuthError']){
+         errors.push(this.$i18n.t("USERNAME_PW_ERROR"))
+         this.user.password = ""
+         this.$store.dispatch('signin/resetAuthError')
+      }
+      return errors
+    },
+    hasPasswordError() {
+      let errors = []
+      if (!this.$v.user.password.$dirty) return errors
+      !this.$v.user.password.required && errors.push(this.$i18n.t("REQUIRED"))
+      return errors
+    }
+  },
+  mounted: function() {
+    this.language = this.$i18n.locale
+  },
+  methods: {
+    submit() {
+      this.$store.dispatch('signin/signinODK', this.user)
+    },
+    changeLanguage(language) {
+      this.$i18n.locale = language
+      this.language = this.$i18n.locale
     }
   }
 }
 </script>
+
+<style scoped>
+.headline {
+  margin-bottom: 20px;
+}
+
+.connect{
+    margin-top: 20px;
+}
+
+.lang {
+  float: right;
+  height: 30px;
+  width: auto;
+  cursor: pointer;
+}
+</style>

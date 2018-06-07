@@ -3,8 +3,10 @@
     <v-layout align-center justify-center>
       <v-flex md4 sm6 xs10>
         <div class="headline">
-          {{ $t("CONNECT_TO") }} <span class="blue--text">BDMER³</span>.
-          <img class="lang" src="../../assets/en.png">
+          {{ $t("STEP") }}2 :
+            {{ $t("CONNECT_TO") }} <span class="blue--text">BDMER³</span>.
+            <img v-if="language !== 'en'" @click="changeLanguage('en')" class="lang" src="../../assets/en.png">
+            <img v-if="language !== 'fr'" @click="changeLanguage('fr')" class="lang" src="../../assets/fr.png">
         </div>
 
         <v-form ref="form" v-model="valid" lazy-validation>
@@ -12,23 +14,29 @@
          prepend-icon="link"
          v-model="user.url"
          label="Url "
-         :error-messages="errors"
+         :error-messages="hasUrlError"
+         @input="$v.user.url.$touch()"
+         @blur="$v.user.url.$touch()"
          required></v-text-field>
 
           <v-text-field v-model="user.username"
          :label="$t('USERNAME')"
          prepend-icon="person"
-         :error-messages="errors"
+         :error-messages="hasUsernameError"
+         @input="$v.user.username.$touch()"
+         @blur="$v.user.username.$touch()"
          required></v-text-field>
 
           <v-text-field single-line
           prepend-icon="lock"
+          :error-messages="hasPasswordError"
+          @input="$v.user.password.$touch()"
+          @blur="$v.user.password.$touch()"
           :append-icon="e1 ? 'visibility' : 'visibility_off'"
           :append-icon-cb="() => (e1 = !e1)"
           :type="e1 ? 'password' : 'text'"
           v-model="user.password"
           :label="$t('PASSWORD')"
-          :error-messages="errors"
           required></v-text-field>
 
           <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
@@ -40,43 +48,96 @@
 
 <script>
 import store from '@/store'
+import { required } from 'vuelidate/lib/validators'
 
 export default {
- data: () => ({
-   e1: true,
-   user:{
-     url: "",
-     username: "",
-     password: ""
-   },
-   usernames: [],
-   mails: [],
-   valid: true,
-   errors: []
- }),
- computed: {
-  isCompleted () {
-    return this.user.username && this.user.password && this.user.url;
+  data: () => ({
+    e1: true,
+    user: {
+      url: "http://localhost:5984",
+      username: "admin",
+      password: "admin"
+    },
+    usernames: [],
+    mails: [],
+    valid: true,
+    errorUrl: [],
+    errorAuth: [],
+    language: ""
+  }),
+  validations: {
+    user: {
+      url: {
+        required
+      },
+      username: {
+        required
+      },
+      password: {
+        required
+      }
+    }
+  },
+  computed: {
+    isCompleted() {
+      return this.user.username && this.user.password && this.user.url;
+    },
+    hasUrlError() {
+      let errors = []
+      if (!this.$v.user.url.$dirty) return errors
+      !this.$v.user.url.required && errors.push(this.$i18n.t("REQUIRED"))
+      if(this.$store.getters['signin/hasUrlError']){
+        errors.push(this.$i18n.t("URL_ERROR"))
+        this.$store.dispatch('signin/resetUrlError')
+      }
+      return errors
+    },
+    hasUsernameError() {
+      let errors = []
+      if (!this.$v.user.username.$dirty) return errors
+      !this.$v.user.username.required && errors.push(this.$i18n.t("REQUIRED"))
+      if(this.$store.getters['signin/hasAuthError']){
+         errors.push(this.$i18n.t("USERNAME_PW_ERROR"))
+         this.user.password = ""
+         this.$store.dispatch('signin/resetAuthError')
+      }
+      return errors
+    },
+    hasPasswordError() {
+      let errors = []
+      if (!this.$v.user.password.$dirty) return errors
+      !this.$v.user.password.required && errors.push(this.$i18n.t("REQUIRED"))
+      return errors
+    }
+  },
+  mounted: function() {
+    this.language = this.$i18n.locale
+  },
+  methods: {
+    submit() {
+      this.$store.dispatch('signin/signinBdmer', this.user)
+    },
+    changeLanguage(language) {
+      this.$i18n.locale = language
+      this.language = this.$i18n.locale
+    }
   }
-},
-created: ()=>{
-  console.log(this)
-},
- methods: {
-   submit () {
-     this.$store.dispatch('account/signup', this.newUser)
-   }
- }
 }
 </script>
 
 <style scoped>
-.headline{
- margin-bottom: 20px;
+.headline {
+  margin-bottom: 20px;
 }
-.lang{
+
+.connect{
+    margin-top: 20px;
+}
+
+.lang {
   float: right;
-  height: auto;
-  width: 50px;
+  height: 30px;
+  width: auto;
+  cursor: pointer;
 }
 </style>
