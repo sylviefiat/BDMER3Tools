@@ -1,19 +1,16 @@
 <template>
   <v-container fluid fill-height>
-    <v-layout align-center justify-center>
+    <v-layout justify-center>
       <v-flex md4 sm6 xs10>
-        <div class="headline">
-          {{ $t("STEP") }}1 :
-            {{ $t("CONNECT_TO") }} <span class="blue--text">ODK</span>.
-            <img v-if="language !== 'en'" @click="changeLanguage('en')" class="lang" src="../../assets/en.png">
-            <img v-if="language !== 'fr'" @click="changeLanguage('fr')" class="lang" src="../../assets/fr.png">
+        <div class="display-2">
+            {{ $t("CONNECT_TO") }} <span class="deep-orange--text">ODK</span>.
         </div>
-
-        <v-form ref="form" v-model="valid" lazy-validation>
+        <v-divider></v-divider>
+        <v-form class="form" ref="form" v-model="valid" lazy-validation>
           <v-text-field
          prepend-icon="link"
          v-model="user.url"
-         label="Url "
+         label="Url ( ex: 193.55.100.40:5555 ) "
          :error-messages="hasUrlError"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
@@ -39,7 +36,8 @@
           :label="$t('PASSWORD')"
           required></v-text-field>
 
-          <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
+          <v-btn block type="submit" :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
+          <v-btn flat small block to="home" color="red">{{$t('RETURN')}}</v-btn>
         </v-form>
       </v-flex>
     </v-layout>
@@ -47,23 +45,26 @@
 </template>
 
 <script>
-import store from '@/store'
-import { required } from 'vuelidate/lib/validators'
+import store from "@/store";
+import { required } from "vuelidate/lib/validators";
 
 export default {
   data: () => ({
     e1: true,
     user: {
-      url: "193.51.249.49",
-      username: "postgres",
-      password: "docker"
+      url: "",
+      username: "",
+      password: "",
+      dbConfiguration: {
+        schema: "",
+        db: ""
+      }
     },
     usernames: [],
     mails: [],
     valid: true,
     errorUrl: [],
-    errorAuth: [],
-    language: ""
+    errorAuth: []
   }),
   validations: {
     user: {
@@ -83,55 +84,60 @@ export default {
       return this.user.username && this.user.password && this.user.url;
     },
     hasUrlError() {
-      let errors = []
-      if (!this.$v.user.url.$dirty) return errors
-      !this.$v.user.url.required && errors.push(this.$i18n.t("REQUIRED"))
-      if(this.$store.getters['signin/hasUrlError']){
-        errors.push(this.$i18n.t("URL_ERROR"))
-        this.$store.dispatch('signin/resetUrlError')
+      let errors = [];
+      if (!this.$v.user.url.$dirty) return errors;
+      !this.$v.user.url.required && errors.push(this.$i18n.t("REQUIRED"));
+      if (this.$store.getters["signin/hasUrlError"]) {
+        errors.push(this.$i18n.t("URL_ERROR"));
+        this.$store.dispatch("signin/resetUrlError");
       }
-      return errors
+      return errors;
     },
     hasUsernameError() {
-      let errors = []
-      if (!this.$v.user.username.$dirty) return errors
-      !this.$v.user.username.required && errors.push(this.$i18n.t("REQUIRED"))
-      if(this.$store.getters['signin/hasAuthError']){
-         errors.push(this.$i18n.t("USERNAME_PW_ERROR"))
-         this.user.password = ""
-         this.$store.dispatch('signin/resetAuthError')
+      let errors = [];
+      if (!this.$v.user.username.$dirty) return errors;
+      !this.$v.user.username.required && errors.push(this.$i18n.t("REQUIRED"));
+      if (this.$store.getters["signin/hasAuthError"]) {
+        errors.push(this.$i18n.t("USERNAME_PW_ERROR"));
+        this.user.password = "";
+        this.$store.dispatch("signin/resetAuthError");
       }
-      return errors
+      return errors;
     },
     hasPasswordError() {
-      let errors = []
-      if (!this.$v.user.password.$dirty) return errors
-      !this.$v.user.password.required && errors.push(this.$i18n.t("REQUIRED"))
-      return errors
+      let errors = [];
+      if (!this.$v.user.password.$dirty) return errors;
+      !this.$v.user.password.required && errors.push(this.$i18n.t("REQUIRED"));
+      return errors;
     }
   },
   mounted: function() {
-    this.language = this.$i18n.locale
+    if (this.$store.getters["signin/getUserODK"].username !== undefined) {
+      this.user = this.$store.getters["signin/getUserODK"];
+    }
   },
   methods: {
     submit() {
-      this.$store.dispatch('signin/signinODK', this.user)
-    },
-    changeLanguage(language) {
-      this.$i18n.locale = language
-      this.language = this.$i18n.locale
+      this.user.dbConfiguration = this.$store.getters[
+        "signin/getDbConfiguration"
+      ];
+      this.$store.dispatch("signin/signinODK", this.user);
     }
   }
-}
+};
 </script>
 
 <style scoped>
+.form {
+  margin-top: 30px;
+}
+
 .headline {
   margin-bottom: 20px;
 }
 
-.connect{
-    margin-top: 20px;
+.connect {
+  margin-top: 20px;
 }
 
 .lang {

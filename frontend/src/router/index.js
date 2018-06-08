@@ -1,41 +1,51 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import store from '@/store'
-import Home from '@/components/Home'
-import SigninBdmer from '@/components/signin/SigninBdmer'
-import SigninODK from '@/components/signin/SigninODK'
+import Vue from "vue";
+import Router from "vue-router";
+import store from "@/store";
+import Home from "@/components/Home";
+import SigninBdmer from "@/components/signin/SigninBdmer";
+import SigninODK from "@/components/signin/SigninODK";
+import DbConfiguration from "@/components/signin/DbConfiguration";
 
-Vue.use(Router)
+Vue.use(Router);
 
-const router =  new Router({
+const router = new Router({
   routes: [
     {
-      path: '/signinBdmer',
-      name: 'SigninBdmer',
+      path: "/signinBdmer",
+      name: "SigninBdmer",
       component: SigninBdmer
     },
     {
-      path: '/signinODK',
-      name: 'SigninODK',
+      path: "/signinODK",
+      name: "SigninODK",
       component: SigninODK
     },
     {
-      path: '/',
-      name: 'Home',
+      path: "/dbConfiguration",
+      name: "DbConfiguration",
+      component: DbConfiguration
+    },
+    {
+      path: "/",
+      name: "Home",
       component: Home
     }
   ]
-})
+});
 
 router.beforeEach((to, from, next) => {
-  if (to.name != 'SigninODK' && to.name != 'SigninBdmer' && !store.getters['signin/isConnected']) {
-    console.log(to.name)
+  if (
+    to.name != "SigninODK" &&
+    to.name != "SigninBdmer" &&
+    to.name != "DbConfiguration" &&
+    to.name != "Home"
+  ) {
     next({
-      name: 'SigninODK'
-    })
+      name: "Home"
+    });
   } else {
-    next()
+    next();
   }
-})
+});
 
-export default router
+export default router;

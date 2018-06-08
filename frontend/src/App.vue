@@ -1,5 +1,28 @@
 <template>
-  <v-app :dark="themeDarkVariant">
+<v-app :dark="themeDarkVariant">
+  <v-toolbar fixed app dense>
+<v-toolbar-title class="white--text">Title</v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-toolbar-items>
+      <v-btn flat to="/">{{ $t("HOME") }}</v-btn>
+      <v-btn flat to="signinODK">ODK</v-btn>
+      <v-btn flat to="signinBdmer">BDMER³</v-btn>
+    </v-toolbar-items>
+    <v-menu>
+      <v-toolbar-title slot="activator">
+        <span class="btn btn--flat">{{ $t("LANGUAGE") }} ({{language}})</span>
+        <v-icon dark>arrow_drop_down</v-icon>
+      </v-toolbar-title>
+      <v-list class="toggle-language">
+        <v-list-tile @click="changeLanguage('fr')">
+          <v-list-tile-title>Français</v-list-tile-title>
+        </v-list-tile>
+        <v-list-tile @click="changeLanguage('en')">
+          <v-list-tile-title>English</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
+  </v-toolbar>
   <v-content>
     <router-view/>
   </v-content>
@@ -10,15 +33,28 @@
 export default {
   data: () => ({
     drawer: false,
-    themeDarkVariant: true
+    themeDarkVariant: true,
+    language: ""
   }),
-  props: {
+  props: {},
+  mounted: function() {
+    this.language = this.$i18n.locale;
+  },
+  methods: {
+    changeLanguage(language) {
+      this.$i18n.locale = language;
+      this.language = this.$i18n.locale;
+    }
   }
-}
+};
 </script>
 
 <style>
-.toggle-theme{
-  margin-top: 20px;
+.toggle-language {
+  margin-top: 37px;
+}
+
+.content {
+  margin-top: 100px;
 }
 </style>

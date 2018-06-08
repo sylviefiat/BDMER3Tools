@@ -5,13 +5,17 @@
   "author": "MorganDbs <mailmorgandubois@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
-    "start": "npm run dev",
+    "dev":
+      "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "start": "node src/config/index.js && npm run dev",
     "build": "node build/build.js"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
+    "crypto-js": "^3.1.9-1",
+    "js-cookie": "^2.2.0",
+    "random-token": "0.0.8",
     "vue": "^2.5.2",
     "vue-i18n": "^7.8.0",
     "vue-router": "^3.0.1",
@@ -61,9 +65,5 @@
     "node": ">= 6.0.0",
     "npm": ">= 3.0.0"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+  "browserslist": ["> 1%", "last 2 versions", "not ie <= 8"]
 }

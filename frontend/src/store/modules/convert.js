@@ -1,9 +1,6 @@
-import api from '@/api'
-// import ls from '@/services/ls'
+import api from "@/api";
 
-const initialState = {
-
-}
+const initialState = {};
 
 export default {
   namespaced: true,
@@ -11,14 +8,15 @@ export default {
   mutations: {},
   getters: {},
   actions: {
-    convert: ({
-      commit
-    }) => {
-      api.post('/convert').then((response) => {
-        console.log(response)
-      }).catch((error) => {
-        console.log(error.response)
-      })
+    convert: ({ commit }) => {
+      api
+        .post("/convert")
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
     }
   }
-}
+};
