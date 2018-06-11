@@ -6,9 +6,9 @@
       <v-divider></v-divider>
       <div class="importation" v-if="!importation">
         <div>
-          <v-btn class="btn-import" :color="odkConnected ? 'success' : 'primary'" to="signinODK" block @click="clear">{{ $t("CONNECT_TO") }} ODK</v-btn>
+          <v-btn class="btn-import" :color="odkConnected ? 'success' : 'primary'" to="signinODK" block @click="clear">{{ $t("CONNECT_TO") }} ODK <v-icon right v-if="odkConnected">check</v-icon></v-btn>
           <v-btn flat icon color="success" to="dbConfiguration"><v-icon>settings</v-icon></v-btn> <span class="redirect" @click="to('dbConfiguration')">{{ $t("CONFIGURE_DB_SCHEMA") }} </span>
-          <v-btn class="btn-import" :color="bdmerConnected ? 'success' : 'primary'" to="signinBdmer" block @click="clear">{{ $t("CONNECT_TO") }} BDMER³</v-btn>
+          <v-btn class="btn-import" :color="bdmerConnected ? 'success' : 'primary'" to="signinBdmer" block @click="clear">{{ $t("CONNECT_TO") }} BDMER³  <v-icon right v-if="bdmerConnected">check</v-icon></v-btn>
         </div>
 
         <p> {{ $t("IMPORT_DESCRIPTION") }} </p>
@@ -59,23 +59,29 @@ export default {
   }),
   mounted: function() {
     this.bdmerConnected =
-      this.$store.getters["signin/getUserBdmer"].username !== undefined
+      this.$store.getters["auth/getUserBdmer"].username !== undefined
         ? true
         : false;
     this.odkConnected =
-      this.$store.getters["signin/getUserODK"].username !== undefined
+      this.$store.getters["auth/getUserODK"].username !== undefined
         ? true
         : false;
     this.invalid =
-      this.$store.getters["signin/getUserBdmer"].username !== undefined &&
-      this.$store.getters["signin/getUserODK"].username !== undefined
+      this.$store.getters["auth/getUserBdmer"].username !== undefined &&
+      this.$store.getters["auth/getUserODK"].username !== undefined
         ? false
         : true;
     this.language = this.$i18n.locale;
   },
   methods: {
     importData() {
-      this.$store.dispatch("import/importation");
+      let user = {
+        odk: this.$store.getters["auth/getUserODK"],
+        bdmer: this.$store.getters["auth/getUserBdmer"]
+      };
+
+      this.$store.dispatch("importation/import", user);
+
       this.importation = true;
       setTimeout(() => {
         this.importationDone = true;

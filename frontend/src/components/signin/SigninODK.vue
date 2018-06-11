@@ -10,8 +10,9 @@
           <v-text-field
          prepend-icon="link"
          v-model="user.url"
-         label="Url ( ex: 193.55.100.40:5555 ) "
+         label="Url "
          :error-messages="hasUrlError"
+         hint="ex: 193.55.100.40:5555"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
          required></v-text-field>
@@ -87,9 +88,9 @@ export default {
       let errors = [];
       if (!this.$v.user.url.$dirty) return errors;
       !this.$v.user.url.required && errors.push(this.$i18n.t("REQUIRED"));
-      if (this.$store.getters["signin/hasUrlError"]) {
+      if (this.$store.getters["auth/hasUrlError"]) {
         errors.push(this.$i18n.t("URL_ERROR"));
-        this.$store.dispatch("signin/resetUrlError");
+        this.$store.dispatch("auth/resetUrlError");
       }
       return errors;
     },
@@ -97,10 +98,10 @@ export default {
       let errors = [];
       if (!this.$v.user.username.$dirty) return errors;
       !this.$v.user.username.required && errors.push(this.$i18n.t("REQUIRED"));
-      if (this.$store.getters["signin/hasAuthError"]) {
+      if (this.$store.getters["auth/hasAuthError"]) {
         errors.push(this.$i18n.t("USERNAME_PW_ERROR"));
         this.user.password = "";
-        this.$store.dispatch("signin/resetAuthError");
+        this.$store.dispatch("auth/resetAuthError");
       }
       return errors;
     },
@@ -112,16 +113,16 @@ export default {
     }
   },
   mounted: function() {
-    if (this.$store.getters["signin/getUserODK"].username !== undefined) {
-      this.user = this.$store.getters["signin/getUserODK"];
+    if (this.$store.getters["auth/getUserODK"].username !== undefined) {
+      this.user = this.$store.getters["auth/getUserODK"];
     }
   },
   methods: {
     submit() {
       this.user.dbConfiguration = this.$store.getters[
-        "signin/getDbConfiguration"
+        "auth/getDbConfiguration"
       ];
-      this.$store.dispatch("signin/signinODK", this.user);
+      this.$store.dispatch("auth/signinODK", this.user);
     }
   }
 };

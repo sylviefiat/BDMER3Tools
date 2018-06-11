@@ -8,9 +8,9 @@ export default {
   mutations: {},
   getters: {},
   actions: {
-    convert: ({ commit }) => {
+    import: ({ commit }, user) => {
       api
-        .post("/convert")
+        .post("/import", user)
         .then(response => {
           console.log(response);
         })

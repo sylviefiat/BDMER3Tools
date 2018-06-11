@@ -56,8 +56,8 @@ export default {
     }
   },
   mounted: function() {
-    if (this.$store.getters["signin/getDbConfiguration"].db !== undefined) {
-      this.dbConfiguration = this.$store.getters["signin/getDbConfiguration"];
+    if (this.$store.getters["auth/getDbConfiguration"].db !== undefined) {
+      this.dbConfiguration = this.$store.getters["auth/getDbConfiguration"];
     }
   },
   computed: {
@@ -81,7 +81,7 @@ export default {
   },
   methods: {
     submit() {
-      this.$store.dispatch("signin/saveDbConfiguration", this.dbConfiguration);
+      this.$store.dispatch("auth/saveDbConfiguration", this.dbConfiguration);
     }
   }
 };

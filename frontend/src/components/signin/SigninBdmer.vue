@@ -76,8 +76,8 @@ export default {
     }
   },
   mounted: function() {
-    if (this.$store.getters["signin/getUserBdmer"].username !== undefined) {
-      this.user = this.$store.getters["signin/getUserBdmer"];
+    if (this.$store.getters["auth/getUserBdmer"].username !== undefined) {
+      this.user = this.$store.getters["auth/getUserBdmer"];
     }
   },
   computed: {
@@ -88,9 +88,9 @@ export default {
       let errors = [];
       if (!this.$v.user.url.$dirty) return errors;
       !this.$v.user.url.required && errors.push(this.$i18n.t("REQUIRED"));
-      if (this.$store.getters["signin/hasUrlError"]) {
+      if (this.$store.getters["auth/hasUrlError"]) {
         errors.push(this.$i18n.t("URL_ERROR"));
-        this.$store.dispatch("signin/resetUrlError");
+        this.$store.dispatch("auth/resetUrlError");
       }
       return errors;
     },
@@ -98,10 +98,10 @@ export default {
       let errors = [];
       if (!this.$v.user.username.$dirty) return errors;
       !this.$v.user.username.required && errors.push(this.$i18n.t("REQUIRED"));
-      if (this.$store.getters["signin/hasAuthError"]) {
+      if (this.$store.getters["auth/hasAuthError"]) {
         errors.push(this.$i18n.t("USERNAME_PW_ERROR"));
         this.user.password = "";
-        this.$store.dispatch("signin/resetAuthError");
+        this.$store.dispatch("auth/resetAuthError");
       }
       return errors;
     },
@@ -114,7 +114,7 @@ export default {
   },
   methods: {
     submit() {
-      this.$store.dispatch("signin/signinBdmer", this.user);
+      this.$store.dispatch("auth/signinBdmer", this.user);
     }
   }
 };
