@@ -26,5 +26,6 @@
   "HOME": "HOME",
   "RETURN": "Go back home",
   "IMPORT_TOOLTIP": "You have to connect to ODK and Bdmer before importing",
-  "IMPORT_TOOLTIP_OK": "Import can be perfomed !"
+  "IMPORT_TOOLTIP_OK": "Import can be perfomed !",
+  "IMPORT_WARNING": "Some elements couldn't be imported. Check the list just bellow"
 }

@@ -13,8 +13,7 @@
   "IMPORT_BUTTON": "Lancer la importation !",
   "IMPORTATION": "Nous sommes en train d'importer vos données...",
   "IMPORT_SUCCESS": "Vos données ont étés importés avec succès !",
-  "IMPORT_FAIL":
-    "Votre importation à eu un problème, regardez les erreurs juste en dessous",
+  "IMPORT_FAIL": "Votre importation à eu un problème, regardez les erreurs juste en dessous",
   "GO_BACK_TO_CONVERION": "Retourner à l'importation",
   "DATABASE_CONFIGURATION": "Configuration BDD",
   "LANGUAGE": "Langues",
@@ -27,5 +26,6 @@
   "HOME": "Accueil",
   "RETURN": "Retourner à l'accueil",
   "IMPORT_TOOLTIP": "Vous devez vous connecter à ODK et Bdmer avant d'importer",
-  "IMPORT_TOOLTIP_OK": "L'importation peut être lancé !"
+  "IMPORT_TOOLTIP_OK": "L'importation peut être lancé !",
+  "IMPORT_WARNING": "Certains éléments n'ont pas pu être importé. Regardez la liste ci-dessous"
 }

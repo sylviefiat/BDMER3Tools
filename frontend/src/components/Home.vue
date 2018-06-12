@@ -20,14 +20,33 @@
       </div>
 
       <div class="importation" v-if="importation">
-        <div v-if="!importationDone">
+        <div v-if="isLoading">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
           <p> {{ $t("IMPORTATION") }} </p>
         </div>
-        <div v-if="importationDone">
+        <div v-if="!isLoading">
           <v-alert v-model="alertSucess" type="success">
             {{ $t("IMPORT_SUCCESS") }}
           </v-alert>
+
+          <v-alert v-model="alertWarning" type="warning">
+            {{ $t("IMPORT_WARNING") }}
+          </v-alert>
+
+          <v-data-table
+            :headers="headers"
+            :items="errors"
+            class="elevation-1"
+          >
+            <template slot="items" slot-scope="props">
+              <td>
+                <div v-if="props.item.table !== '' ">{{props.item.table}}</div>
+                <div v-if="props.item.row !== '' ">{{props.item.row}}</div>
+              </td>
+
+              <td>{{ props.item.msg }}</td>
+            </template>
+          </v-data-table>
 
           <v-alert v-model="alertFail" type="error">
             {{ $t("IMPORT_FAIL") }}
@@ -50,27 +69,37 @@ export default {
   data: () => ({
     alertSucess: false,
     alertFail: false,
+    alertWarning: false,
     language: "",
     importation: false,
     importationDone: false,
     bdmerConnected: false,
     odkConnected: false,
-    invalid: true
+    invalid: true,
+    errors: [],
+    isLoading: false,
+    headers: [{ text: "Error on" }, { text: "Description" }]
   }),
   mounted: function() {
-    this.bdmerConnected =
-      this.$store.getters["auth/getUserBdmer"].username !== undefined
-        ? true
-        : false;
-    this.odkConnected =
-      this.$store.getters["auth/getUserODK"].username !== undefined
-        ? true
-        : false;
+    this.$store.watch(
+      () => this.$store.getters["importation/isLoading"],
+      res => {
+        this.isLoading = res;
+      }
+    );
+    this.$store.watch(
+      () => this.$store.getters["importation/hasErrors"],
+      res => {
+        this.errors = res;
+        console.log(this.errors);
+        this.alertWarning = true;
+      }
+    );
+
+    this.bdmerConnected = this.$store.getters["auth/getUserBdmer"].username !== undefined ? true : false;
+    this.odkConnected = this.$store.getters["auth/getUserODK"].username !== undefined ? true : false;
     this.invalid =
-      this.$store.getters["auth/getUserBdmer"].username !== undefined &&
-      this.$store.getters["auth/getUserODK"].username !== undefined
-        ? false
-        : true;
+      this.$store.getters["auth/getUserBdmer"].username !== undefined && this.$store.getters["auth/getUserODK"].username !== undefined ? false : true;
     this.language = this.$i18n.locale;
   },
   methods: {
@@ -83,14 +112,6 @@ export default {
       this.$store.dispatch("importation/import", user);
 
       this.importation = true;
-      setTimeout(() => {
-        this.importationDone = true;
-        if (Math.random() >= 0.5) {
-          this.alertSucess = true;
-        } else {
-          this.alertFail = true;
-        }
-      }, 2500);
     },
     changeLanguage(language) {
       this.$i18n.locale = language;
@@ -100,6 +121,7 @@ export default {
       this.importationDone = false;
       this.importation = false;
       this.alertSucess = false;
+      this.alertWarning = false;
       this.alertFail = false;
     },
     to(redirect) {

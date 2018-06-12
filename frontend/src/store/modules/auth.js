@@ -6,22 +6,10 @@ import CryptoJS from "crypto-js";
 import config from "@/config";
 
 const initialState = {
-  userBdmer:
-    Cookies.get("userBdmer") !== undefined
-      ? toString(
-          CryptoJS.AES.decrypt(Cookies.get("userBdmer"), config.cryptoKey)
-        )
-      : null,
-  userODK:
-    Cookies.get("userODK") !== undefined
-      ? toString(CryptoJS.AES.decrypt(Cookies.get("userODK"), config.cryptoKey))
-      : null,
+  userBdmer: Cookies.get("userBdmer") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("userBdmer"), config.cryptoKey)) : null,
+  userODK: Cookies.get("userODK") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("userODK"), config.cryptoKey)) : null,
   dbConfiguration:
-    Cookies.get("dbConfiguration") !== undefined
-      ? toString(
-          CryptoJS.AES.decrypt(Cookies.get("dbConfiguration"), config.cryptoKey)
-        )
-      : null
+    Cookies.get("dbConfiguration") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("dbConfiguration"), config.cryptoKey)) : null
 };
 
 export default {
@@ -40,20 +28,14 @@ export default {
     signinBdmer: (state, user) => {
       state.connected = true;
       state.userBdmer = user;
-      Cookies.set(
-        "userBdmer",
-        CryptoJS.AES.encrypt(JSON.stringify(user), config.cryptoKey)
-      );
+      Cookies.set("userBdmer", CryptoJS.AES.encrypt(JSON.stringify(user), config.cryptoKey));
       router.push({
         name: "Home"
       });
     },
     signinODK: (state, user) => {
       state.userODK = user;
-      Cookies.set(
-        "userODK",
-        CryptoJS.AES.encrypt(JSON.stringify(user), config.cryptoKey)
-      );
+      Cookies.set("userODK", CryptoJS.AES.encrypt(JSON.stringify(user), config.cryptoKey));
       router.push({
         name: "Home"
       });
@@ -73,10 +55,7 @@ export default {
     },
     saveDbConfiguration: (state, dbConfiguration) => {
       state.dbConfiguration = dbConfiguration;
-      Cookies.set(
-        "dbConfiguration",
-        CryptoJS.AES.encrypt(JSON.stringify(dbConfiguration), config.cryptoKey)
-      );
+      Cookies.set("dbConfiguration", CryptoJS.AES.encrypt(JSON.stringify(dbConfiguration), config.cryptoKey));
       router.push({
         name: "Home"
       });
