@@ -25,34 +25,68 @@
           <p> {{ $t("IMPORTATION") }} </p>
         </div>
         <div v-if="!isLoading">
-          <v-alert v-model="alertSucess" type="success">
-            {{ $t("IMPORT_SUCCESS") }}
-          </v-alert>
 
-          <v-alert v-model="alertWarning" type="warning">
-            {{ $t("IMPORT_WARNING") }}
+          <v-alert v-model="alertSuccess" class="alert" type="success">
+            {{success.length}} {{ $t("IMPORT_SUCCESS") }}
+            <a @click="displaySuccess = !displaySuccess">{{ $t("DISPLAY_SUCCESS") }} </a>
           </v-alert>
 
           <v-data-table
-            :headers="headers"
-            :items="errors"
+            v-if="displaySuccess"
+            :headers="headersSuccess"
+            :items="success"
             class="elevation-1"
           >
             <template slot="items" slot-scope="props">
               <td>
-                <div v-if="props.item.table !== '' ">{{props.item.table}}</div>
-                <div v-if="props.item.row !== '' ">{{props.item.row}}</div>
+                {{props.item.success}}
               </td>
 
               <td>{{ props.item.msg }}</td>
             </template>
           </v-data-table>
 
-          <v-alert v-model="alertFail" type="error">
+          <v-alert v-model="alertWarning" class="alert" type="warning">
+            {{warnings.length}} {{ $t("IMPORT_WARNING") }}
+
+            <a @click="displayWarnings = !displayWarnings">{{ $t("DISPLAY_WARNING") }} </a>
+          </v-alert>
+
+          <v-data-table
+            v-if="displayWarnings"
+            :headers="headersWarnings"
+            :items="warnings"
+            class="elevation-1"
+          >
+            <template slot="items" slot-scope="props">
+              <td>
+                {{props.item.warning}}
+              </td>
+
+              <td>{{ props.item.msg }}</td>
+            </template>
+          </v-data-table>
+
+          <v-alert v-model="alertFail" class="alert" type="error">
             {{ $t("IMPORT_FAIL") }}
           </v-alert>
 
-          <v-btn class="btn-import" color="primary" block @click="clear">{{ $t("GO_BACK_TO_IMPORTATION") }}</v-btn>
+          <v-data-table
+            :headers="headersErrors"
+            :items="errors"
+            class="elevation-1"
+          >
+            <template slot="items" slot-scope="props">
+              <td>
+                {{props.item.error}}
+              </td>
+
+              <td>{{ props.item.msg }}</td>
+            </template>
+          </v-data-table>
+
+
+          <v-btn class="btn-go-back" color="primary" block @click="clear">{{ $t("GO_BACK_TO_IMPORTATION") }}</v-btn>
         </div>
       </div>
     </v-flex>
@@ -67,7 +101,7 @@ import router from "@/router";
 
 export default {
   data: () => ({
-    alertSucess: false,
+    alertSuccess: false,
     alertFail: false,
     alertWarning: false,
     language: "",
@@ -77,8 +111,14 @@ export default {
     odkConnected: false,
     invalid: true,
     errors: [],
+    warnings: [],
+    success: [],
+    displayWarnings: false,
+    displaySuccess: false,
     isLoading: false,
-    headers: [{ text: "Error on" }, { text: "Description" }]
+    headersErrors: [{ text: "Error on", value: "error" }, { text: "Description", value: "msg" }],
+    headersWarnings: [{ text: "Warning on", value: "warning" }, { text: "Description", value: "msg" }],
+    headersSuccess: [{ text: "Row", value: "success" }, { text: "Description", value: "msg" }]
   }),
   mounted: function() {
     this.$store.watch(
@@ -90,16 +130,36 @@ export default {
     this.$store.watch(
       () => this.$store.getters["importation/hasErrors"],
       res => {
-        this.errors = res;
-        console.log(this.errors);
-        this.alertWarning = true;
+        if (res.length > 0) {
+          this.errors = res;
+          this.alertFail = true;
+        }
+      }
+    );
+
+    this.$store.watch(
+      () => this.$store.getters["importation/hasWarnings"],
+      res => {
+        if (res.length > 0) {
+          this.warnings = res;
+          this.alertWarning = true;
+        }
+      }
+    );
+
+    this.$store.watch(
+      () => this.$store.getters["importation/hasSuccess"],
+      res => {
+        if (res.length > 0) {
+          this.success = res;
+          this.alertSuccess = true;
+        }
       }
     );
 
     this.bdmerConnected = this.$store.getters["auth/getUserBdmer"].username !== undefined ? true : false;
     this.odkConnected = this.$store.getters["auth/getUserODK"].username !== undefined ? true : false;
-    this.invalid =
-      this.$store.getters["auth/getUserBdmer"].username !== undefined && this.$store.getters["auth/getUserODK"].username !== undefined ? false : true;
+    this.invalid = this.$store.getters["auth/getUserBdmer"].username !== undefined && this.$store.getters["auth/getUserODK"].username !== undefined ? false : true;
     this.language = this.$i18n.locale;
   },
   methods: {
@@ -136,6 +196,10 @@ export default {
   margin-bottom: 30px;
 }
 
+.alert {
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
 .importation {
   margin-top: 30px;
 }
@@ -152,6 +216,10 @@ export default {
 }
 
 .btn-import {
-  margin-top: 20px;
+  margin-top: 30px;
+}
+
+.btn-go-back {
+  margin-top: 50px;
 }
 </style>

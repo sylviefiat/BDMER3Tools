@@ -2,19 +2,25 @@ import api from "@/api";
 
 const initialState = {
   loading: false,
-  errors: []
+  errors: [],
+  warnings: [],
+  success: []
 };
 
 export default {
   namespaced: true,
   state: {
     loading: false,
-    errors: []
+    errors: [],
+    warnings: [],
+    success: []
   },
   mutations: {
     importSuccess: (state, data) => {
       state.loading = false;
-      state.errors = data;
+      state.errors = data.errors;
+      state.warnings = data.warnings;
+      state.success = data.success;
     },
     startLoader: state => {
       state.loading = true;
@@ -26,6 +32,12 @@ export default {
     },
     hasErrors: state => {
       return state.errors;
+    },
+    hasWarnings: state => {
+      return state.warnings;
+    },
+    hasSuccess: state => {
+      return state.success;
     }
   },
   actions: {

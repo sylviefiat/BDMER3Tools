@@ -1,7 +1,7 @@
 <template>
-<v-app :dark="themeDarkVariant">
+<v-app dark>
   <v-toolbar fixed app dense>
-<v-toolbar-title class="white--text">Title</v-toolbar-title>
+<v-toolbar-title class="white--text">IRD Application</v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
       <v-btn flat to="/">{{ $t("HOME") }}</v-btn>

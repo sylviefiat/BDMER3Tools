@@ -12,9 +12,9 @@
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras cursus justo sem, id viverra mi vehicula eu. Maecenas aliquet eros sed metus convallis, at cursus nibh aliquam. Maecenas ultrices neque elit, consectetur feugiat orci bibendum in. Nunc at urna ultricies, imperdiet dui et, hendrerit odio. Etiam nec enim pulvinar, cursus leo sed, luctus erat. Vestibulum cursus lorem dui, vitae facilisis sem feugiat eget. Donec ullamcorper scelerisque dui id ullamcorper.",
   "IMPORT_BUTTON": "Lancer la importation !",
   "IMPORTATION": "Nous sommes en train d'importer vos données...",
-  "IMPORT_SUCCESS": "Vos données ont étés importés avec succès !",
+  "IMPORT_SUCCESS": " éléments ont étés importés avec succès !",
   "IMPORT_FAIL": "Votre importation à eu un problème, regardez les erreurs juste en dessous",
-  "GO_BACK_TO_CONVERION": "Retourner à l'importation",
+  "GO_BACK_TO_CONVERION": "Retourner à la synchronisation",
   "DATABASE_CONFIGURATION": "Configuration BDD",
   "LANGUAGE": "Langues",
   "IMPORT_DATA_FROM": "Importer les données de",
@@ -27,5 +27,7 @@
   "RETURN": "Retourner à l'accueil",
   "IMPORT_TOOLTIP": "Vous devez vous connecter à ODK et Bdmer avant d'importer",
   "IMPORT_TOOLTIP_OK": "L'importation peut être lancé !",
-  "IMPORT_WARNING": "Certains éléments n'ont pas pu être importé. Regardez la liste ci-dessous"
+  "IMPORT_WARNING": " éléments n'ont pas pu être importé.",
+  "DISPLAY_WARNING": "Afficher les warnings",
+  "DISPLAY_SUCCESS": "Afficher les success"
 }
