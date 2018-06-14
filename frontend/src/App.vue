@@ -1,11 +1,11 @@
 <template>
 <v-app dark>
   <v-toolbar fixed app dense>
-<v-toolbar-title class="white--text">IRD Application</v-toolbar-title>
+<v-toolbar-title class="white--text">IRD / SFA</v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
       <v-btn flat to="/">{{ $t("HOME") }}</v-btn>
-      <v-btn flat to="signinODK">ODK</v-btn>
+      <v-btn flat to="signinODK">Seacusey surveys</v-btn>
       <v-btn flat to="signinBdmer">BDMER³</v-btn>
     </v-toolbar-items>
     <v-menu>

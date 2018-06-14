@@ -3,7 +3,7 @@
     <v-layout justify-center>
       <v-flex md4 sm6 xs10>
         <div class="display-2">
-            {{ $t("CONFIGURE") }} <span class="deep-orange--text">{{ $t("DB") }}</span>.
+            {{ $t("CONFIGURE") }} <span class="deep-orange--text">{{ $t("DB") }}</span>
         </div>
         <v-divider></v-divider>
         <v-form class="form" ref="form" lazy-validation>
@@ -67,15 +67,13 @@ export default {
     hasDbError() {
       let errors = [];
       if (!this.dbConfiguration.db.$dirty) return errors;
-      !this.dbConfiguration.db.required &&
-        errors.push(this.$i18n.t("REQUIRED"));
+      !this.dbConfiguration.db.required && errors.push(this.$i18n.t("REQUIRED"));
       return errors;
     },
     hasSchemaError() {
       let errors = [];
       if (!this.dbConfiguration.schema.$dirty) return errors;
-      !this.dbConfiguration.schema.required &&
-        errors.push(this.$i18n.t("REQUIRED"));
+      !this.dbConfiguration.schema.required && errors.push(this.$i18n.t("REQUIRED"));
       return errors;
     }
   },

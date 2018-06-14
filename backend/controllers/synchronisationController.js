@@ -1,30 +1,83 @@
-let fs = require("fs");
-let parse = require("csv-parse");
-let axios = require("axios");
-let blob = require("blob");
 let pgStructure = require("pg-structure");
 let { Pool, Client } = require("pg");
 let PouchDB = require("pouchdb");
 
-exports.odkToBdmer = (req, res) => {
-	importFromOdk(req.body)
+exports.seacuseyToBdmer = (req, res) => {
+	synchronize(req.body)
 		.then(response => {
-			return res.status(200).send(response);
+			if (response.platforms.length > 0) {
+				updateBdmer(response.platforms, req.body).then(plat => {
+					for (let r of plat.errors) {
+						response.errors.push(r);
+					}
+					return res.status(200).send({ errors: response.errors, warnings: response.warnings, success: plat.success });
+				});
+			} else {
+				return res.status(200).send({ errors: response.errors, warnings: response.warnings, success: [] });
+			}
 		})
 		.catch(err => {
-			return res.status(401).send(response);
+			return res.status(401).send(err);
 		});
 };
 
-function importFromOdk(user) {
+/*
+	Updating platforms of BDMER3
+	platforms: list of platform to update
+	user: information from the user
+*/
+function updateBdmer(platforms, user) {
 	let errors = [];
-	let warnings = [];
 	let success = [];
 
+	let db = new PouchDB(user.bdmer.url + "/platforms", {
+		skip_setup: true
+	});
 	return new Promise(function(resolve, reject) {
+		for (let plat of platforms) {
+			db.put(plat.platform)
+				.then(function(response) {
+					for (row of plat.rows) {
+						success.push({ success: row.META_INSTANCE_NAME, msg: "Imported with success" });
+					}
+					if (platforms[platforms.length - 1] === plat) {
+						resolve({ errors: errors, success: success });
+					}
+				})
+				.catch(function(err) {
+					errors.push({
+						error: plat.code,
+						msg: "Couldnt be inserted in database"
+					});
+
+					if (platforms[platforms.length - 1] === plat) {
+						resolve({ errors: errors, success: success });
+					}
+				});
+		}
+	});
+}
+
+/*
+	Synchronisation between Seacusey Survey and BDMER3
+	user: information from the user
+*/
+function synchronize(user) {
+	let errors = [];
+	let warnings = [];
+	let platforms = [];
+	let end = false;
+	let tables = [];
+	let speciesBdmer = [];
+	let addPlatform = false;
+	let rows = [];
+
+	return new Promise(function(resolve, reject) {
+		// Checking that user got all the necessary data
 		if (!user.odk.url || !user.odk.username || !user.odk.password || !user.odk.dbConfiguration.db || !user.odk.dbConfiguration.schema) {
-			return null;
+			reject("missing information");
 		} else {
+			// Connection to pg database (thought pgstructure)
 			pgStructure(
 				{
 					database: user.odk.dbConfiguration.db,
@@ -37,105 +90,120 @@ function importFromOdk(user) {
 			)
 				.then(db => pgStructure.serialize(db))
 				.then(data => {
+					// Getting all the table of pg database
 					var json = JSON.parse(data);
 
+					// Parsing the table to get only those we need
+					for (let table of json.schemas["0"].tables) {
+						if (table.name.startsWith("BUILD") && table.name.endsWith("CORE")) {
+							tables.push(table);
+						}
+					}
+
+					// Getting all the species
 					getAllSpecies(user.bdmer.url)
 						.then(species => {
-							let speciesBdmer = [];
+							// Parsing the species to create an array. For each code species we have an array with all the name of this species
 							for (let specie of species) {
 								let sp = {
 									code: specie.doc.code,
 									names: []
 								};
+
 								for (let name of specie.doc.names) {
 									sp.names.push(name.name.toLowerCase());
 								}
 								speciesBdmer.push(sp);
 							}
 
-							for (let table of json.schemas["0"].tables) {
-								if (table.name.startsWith("BUILD") && table.name.endsWith("CORE")) {
-									// if (table.name === "BUILD_SEACUSEY_BRIZAR_1522900069_CORE") {
-									const client = new Client({
-										user: user.odk.username,
-										host: user.odk.url.split(":")[0],
-										database: user.odk.dbConfiguration.db,
-										password: user.odk.dbConfiguration.password,
-										port: user.odk.url.split(":")[1]
-									});
-									client.connect();
-									client.query("SELECT * FROM " + user.odk.dbConfiguration.schema + '."' + table.name + '"', (err, data) => {
-										let db = new PouchDB(user.bdmer.url + "/platforms", {
-											skip_setup: true
-										});
-										if (data.rows[0] !== undefined) {
-											checkPlatformExist(user.bdmer.url, data.rows[0])
-												.then(platform => {
-													if (platform.status === 404) {
-														errors.push({
-															error: data.rows[0].META_INSTANCE_NAME.split("-")[0],
-															msg: "Platform not found"
-														});
-													} else {
-														for (let row of data.rows) {
-															let station = createStation(row, platform);
-															if (station.err) {
+							// Browsing each table that we got previously
+							for (let table of tables) {
+								// Connecting to pg database (thought pg)
+								const client = new Client({
+									user: user.odk.username,
+									host: user.odk.url.split(":")[0],
+									database: user.odk.dbConfiguration.db,
+									password: user.odk.dbConfiguration.password,
+									port: user.odk.url.split(":")[1]
+								});
+								client.connect();
+								client.query("SELECT * FROM " + user.odk.dbConfiguration.schema + '."' + table.name + '"', (err, data) => {
+									// If the table isn't empty
+									if (data.rows[0] !== undefined) {
+										// Checking if the platform exist
+										checkPlatformExist(user.bdmer.url, data.rows[0])
+											.then(platform => {
+												// If platform isn't found
+												if (platform.status === 404) {
+													errors.push({
+														error: data.rows[0].META_INSTANCE_NAME.split("-")[0],
+														msg: "Platform not found"
+													});
+												} else {
+													// Browsing each row of the table
+													for (let row of data.rows) {
+														// If we are at the last row of the last table
+														if (table === tables[tables.length - 1] && data.rows[data.rows.length - 1] === row) {
+															end = true;
+														}
+														let station = createStation(row, platform);
+														if (station.err) {
+															errors.push({
+																error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																msg: station.msg
+															});
+														} else if (station.warning) {
+															warnings.push({
+																warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																msg: station.msg
+															});
+														} else {
+															let survey = createSurvey(row, platform);
+															if (survey.err) {
 																errors.push({
 																	error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																	msg: station.msg
+																	msg: survey.msg
 																});
-															} else if (station.warning) {
+															} else if (survey.warning) {
 																warnings.push({
 																	warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																	msg: station.msg
+																	msg: survey.msg
 																});
 															} else {
-																let survey = createSurvey(row, platform);
-																if (survey.err) {
+																let count = createCount(row, platform, station, survey, speciesBdmer);
+																if (count.err) {
 																	errors.push({
 																		error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																		msg: survey.msg
-																	});
-																} else if (survey.warning) {
-																	warnings.push({
-																		warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																		msg: survey.msg
+																		msg: count.msg
 																	});
 																} else {
-																	let count = createCount(row, platform, station, survey, species, speciesBdmer);
-																	if (count.err) {
-																		errors.push({
-																			error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																			msg: count.msg
-																		});
-																	} else {
-																		platform.stations.push(station);
-																		survey.counts.push(count);
-																		platform.surveys.push(survey);
-																		db.put(platform)
-																			.then(function(response) {
-																				success.push({
-																					success: row.META_INSTANCE_NAME,
-																					msg: "Imported with success"
-																				});
-																			})
-																			.catch(function(err) {
-																				console.log(err);
-																			});
-																	}
+																	platform.stations.push(station);
+																	survey.counts.push(count);
+																	platform.surveys.push(survey);
+																	addPlatform = true;
+																	rows.push(row);
 																}
 															}
 														}
-														setTimeout(() => {
-															resolve({ errors: errors, warnings: warnings, success: success });
-														}, 10000);
 													}
-												})
-												.catch(err => console.log(err));
-										}
-										client.end();
-									});
-								}
+
+													// If we have a valid platform
+													if (addPlatform) {
+														platforms.push({ platform: platform, rows: rows });
+														addPlatform = false;
+														rows = [];
+													}
+
+													// If we browsed all the rows of the tables
+													if (end) {
+														resolve({ errors: errors, warnings: warnings, platforms: platforms });
+													}
+												}
+											})
+											.catch(err => console.log(err));
+									}
+									client.end();
+								});
 							}
 						})
 						.catch(err => console.log(err));
@@ -145,6 +213,11 @@ function importFromOdk(user) {
 	});
 }
 
+/*
+	Refactoring a coordinate in from Degrees Minutes Decimal to Decimal
+	data: row of the pg database
+	platform: platform refering to the row
+*/
 function createStation(data, platform) {
 	let lng = "";
 	let lat = "";
@@ -201,6 +274,10 @@ function createStation(data, platform) {
 	return station;
 }
 
+/*
+	Refactoring a coordinate in from Degrees Minutes Decimal to Decimal
+	coord: lat or lng in Degrees Minutes Decimal
+*/
 function refactorCoord(coord) {
 	coord = coord
 		.toUpperCase()
@@ -213,6 +290,11 @@ function refactorCoord(coord) {
 	return coord;
 }
 
+/*
+	Creating an object 'Survey' according to BDMER3 'Survey' structure
+	data: row of the pg database
+	platform: platform refering to the row
+*/
 function createSurvey(data, platform) {
 	let survey = {
 		code: "",
@@ -247,7 +329,15 @@ function createSurvey(data, platform) {
 	return survey;
 }
 
-function createCount(data, platform, station, survey, species, speciesBdmer) {
+/*
+	Creating an object 'Count' according to BDMER3 'Count' structure
+	data: row of the pg database
+	platform: platform refering to the row
+	station: station refering to the row
+	survey: survey refering to the row
+	speciesBdmer: species available in bdmer
+*/
+function createCount(data, platform, station, survey, speciesBdmer) {
 	let count = {
 		code: "",
 		codePlatform: platform.code,
@@ -312,6 +402,10 @@ function createCount(data, platform, station, survey, species, speciesBdmer) {
 	return count;
 }
 
+/*
+	Getting all the species from BDMER3
+	url: BDMER3 url
+*/
 function getAllSpecies(url) {
 	return new Promise(function(resolve, reject) {
 		let db = new PouchDB(url + "/species", {
@@ -330,6 +424,11 @@ function getAllSpecies(url) {
 	});
 }
 
+/*
+	Check if the platform exist in BDMER3
+	url: BDMER3 url
+	data: the platform which you want to check his existence
+*/
 function checkPlatformExist(url, data) {
 	return new Promise(function(resolve, reject) {
 		let db = new PouchDB(url + "/platforms", {

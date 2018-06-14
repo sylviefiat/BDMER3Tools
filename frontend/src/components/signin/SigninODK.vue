@@ -3,7 +3,7 @@
     <v-layout justify-center>
       <v-flex md4 sm6 xs10>
         <div class="display-2">
-            {{ $t("CONNECT_TO") }} <span class="deep-orange--text">ODK</span>.
+              {{ $t("CONNECT_TO") }} <span class="deep-orange--text">Seacusey surveys</span>.
         </div>
         <v-divider></v-divider>
         <v-form class="form" ref="form" v-model="valid" lazy-validation>
@@ -119,9 +119,7 @@ export default {
   },
   methods: {
     submit() {
-      this.user.dbConfiguration = this.$store.getters[
-        "auth/getDbConfiguration"
-      ];
+      this.user.dbConfiguration = this.$store.getters["auth/getDbConfiguration"];
       this.$store.dispatch("auth/signinODK", this.user);
     }
   }

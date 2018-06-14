@@ -2,20 +2,20 @@
 <v-container fluid fill-height>
   <v-layout justify-center>
     <v-flex md4 sm6 xs10>
-      <div class="display-2"> {{ $t("IMPORT_DATA_FROM") }}  <span class="deep-orange--text">ODK</span> {{ $t("TO") }} <span class="blue--text">BDMER³</span>.</div>
+      <div class="display-2"> {{ $t("SYNC") }}  <span class="deep-orange--text">Seacusey surveys</span> {{ $t("WITH") }} <span class="blue--text">BDMER³</span>.</div>
       <v-divider></v-divider>
       <div class="importation" v-if="!importation">
         <div>
-          <v-btn class="btn-import" :color="odkConnected ? 'success' : 'primary'" to="signinODK" block @click="clear">{{ $t("CONNECT_TO") }} ODK <v-icon right v-if="odkConnected">check</v-icon></v-btn>
+          <v-btn class="btn-import" :color="odkConnected ? 'success' : 'primary'" to="signinODK" block @click="clear">{{ $t("CONNECT_TO") }} Seacusey surveys <v-icon right v-if="odkConnected">check</v-icon></v-btn>
           <v-btn flat icon color="success" to="dbConfiguration"><v-icon>settings</v-icon></v-btn> <span class="redirect" @click="to('dbConfiguration')">{{ $t("CONFIGURE_DB_SCHEMA") }} </span>
           <v-btn class="btn-import" :color="bdmerConnected ? 'success' : 'primary'" to="signinBdmer" block @click="clear">{{ $t("CONNECT_TO") }} BDMER³  <v-icon right v-if="bdmerConnected">check</v-icon></v-btn>
         </div>
 
         <p> {{ $t("IMPORT_DESCRIPTION") }} </p>
         <v-tooltip bottom>
-          <v-btn slot="activator" class="btn-import" color="primary" :disabled="invalid" block @click="importData">{{ $t("IMPORT_BUTTON") }}</v-btn>
-          <span v-if="invalid">{{$t('IMPORT_TOOLTIP')}}</span>
-          <span v-if="!invalid">{{$t('IMPORT_TOOLTIP_OK')}}</span>
+          <v-btn slot="activator" class="btn-import" color="primary" :disabled="invalid" block @click="importData">{{ $t("SYNC_BUTTON") }}</v-btn>
+          <span v-if="invalid">{{$t('SYNC_TOOLTIP')}}</span>
+          <span v-if="!invalid">{{$t('SYNC_TOOLTIP_OK')}}</span>
         </v-tooltip bottom>
       </div>
 
@@ -86,7 +86,7 @@
           </v-data-table>
 
 
-          <v-btn class="btn-go-back" color="primary" block @click="clear">{{ $t("GO_BACK_TO_IMPORTATION") }}</v-btn>
+          <v-btn class="btn-go-back" color="primary" block @click="clear">{{ $t("GO_BACK_TO_SYNC") }}</v-btn>
         </div>
       </div>
     </v-flex>
@@ -130,9 +130,11 @@ export default {
     this.$store.watch(
       () => this.$store.getters["importation/hasErrors"],
       res => {
+        this.errors = res;
         if (res.length > 0) {
-          this.errors = res;
           this.alertFail = true;
+        } else {
+          this.alertFail = false;
         }
       }
     );
@@ -140,9 +142,11 @@ export default {
     this.$store.watch(
       () => this.$store.getters["importation/hasWarnings"],
       res => {
+        this.warnings = res;
         if (res.length > 0) {
-          this.warnings = res;
           this.alertWarning = true;
+        } else {
+          this.alertWarning = false;
         }
       }
     );
@@ -150,9 +154,11 @@ export default {
     this.$store.watch(
       () => this.$store.getters["importation/hasSuccess"],
       res => {
+        this.success = res;
         if (res.length > 0) {
-          this.success = res;
           this.alertSuccess = true;
+        } else {
+          this.alertSuccess = false;
         }
       }
     );
@@ -183,6 +189,8 @@ export default {
       this.alertSucess = false;
       this.alertWarning = false;
       this.alertFail = false;
+      this.displayWarnings = false;
+      this.displaySuccess = false;
     },
     to(redirect) {
       router.push(redirect);

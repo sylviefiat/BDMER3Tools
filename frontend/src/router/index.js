@@ -34,12 +34,7 @@ const router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-  if (
-    to.name != "SigninODK" &&
-    to.name != "SigninBdmer" &&
-    to.name != "DbConfiguration" &&
-    to.name != "Home"
-  ) {
+  if (to.name != "SigninODK" && to.name != "SigninBdmer" && to.name != "DbConfiguration" && to.name != "Home") {
     next({
       name: "Home"
     });
