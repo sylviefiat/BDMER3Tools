@@ -2549,40 +2549,66 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_electron___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_electron__);
 
 
+/**
+ * Set `__static` path to static files in production
+ * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
+ */
 if (process.env.NODE_ENV !== 'development') {
   global.__static = __webpack_require__(0).join(__dirname, '/static').replace(/\\/g, '\\\\');
 }
 
-var mainWindow = void 0;
-var winURL = process.env.NODE_ENV === 'development' ? 'http://localhost:9080' : 'file://' + __dirname + '/index.html';
+let mainWindow;
+const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080` : `file://${__dirname}/index.html`;
 
 function createWindow() {
+  /**
+   * Initial window options
+   */
   mainWindow = new __WEBPACK_IMPORTED_MODULE_0_electron__["BrowserWindow"]({
-    height: 563,
-    useContentSize: true,
-    width: 1000
+    height: 800,
+    width: 1200
   });
 
   mainWindow.loadURL(winURL);
 
-  mainWindow.on('closed', function () {
+  mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
 __WEBPACK_IMPORTED_MODULE_0_electron__["app"].on('ready', createWindow);
 
-__WEBPACK_IMPORTED_MODULE_0_electron__["app"].on('window-all-closed', function () {
+__WEBPACK_IMPORTED_MODULE_0_electron__["app"].on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     __WEBPACK_IMPORTED_MODULE_0_electron__["app"].quit();
   }
 });
 
-__WEBPACK_IMPORTED_MODULE_0_electron__["app"].on('activate', function () {
+__WEBPACK_IMPORTED_MODULE_0_electron__["app"].on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
 });
+
+/**
+ * Auto Updater
+ *
+ * Uncomment the following code below and install `electron-updater` to
+ * support auto updating. Code Signing with a valid certificate is required.
+ * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
+ */
+
+/*
+import { autoUpdater } from 'electron-updater'
+
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall()
+})
+
+app.on('ready', () => {
+  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+})
+ */
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, "src/main"))
 
 /***/ }),
@@ -2597,18 +2623,30 @@ module.exports = __webpack_require__(15);
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * This file is used specifically and only for development. It installs
+ * `electron-debug` & `vue-devtools`. There shouldn't be any need to
+ *  modify this file, but it can be used to extend your development
+ *  environment.
+ */
 
+/* eslint-disable */
+
+// Set environment for development
 process.env.NODE_ENV = 'development';
 
+// Install `electron-debug` with `devtron`
 __webpack_require__(18)({ showDevTools: true });
 
-__webpack_require__(2).app.on('ready', function () {
-  var installExtension = __webpack_require__(30);
-  installExtension.default(installExtension.VUEJS_DEVTOOLS).then(function () {}).catch(function (err) {
+// Install `vue-devtools`
+__webpack_require__(2).app.on('ready', () => {
+  let installExtension = __webpack_require__(30);
+  installExtension.default(installExtension.VUEJS_DEVTOOLS).then(() => {}).catch(err => {
     console.log('Unable to install `vue-devtools`: \n', err);
   });
 });
 
+// Require `main` process to boot app
 __webpack_require__(15);
 
 /***/ }),
@@ -7209,7 +7247,7 @@ function map_obj(obj, fn){
 /* 46 */
 /***/ (function(module, exports) {
 
-module.exports = {"_args":[["7zip@0.0.6","/home/morgan/Documents/electBdmer"]],"_development":true,"_from":"7zip@0.0.6","_id":"7zip@0.0.6","_inBundle":false,"_integrity":"sha1-nK+xca+CMpSQNTtIFvAzR6oVCjA=","_location":"/7zip","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"7zip@0.0.6","name":"7zip","escapedName":"7zip","rawSpec":"0.0.6","saveSpec":null,"fetchSpec":"0.0.6"},"_requiredBy":["/electron-devtools-installer"],"_resolved":"https://registry.npmjs.org/7zip/-/7zip-0.0.6.tgz","_spec":"0.0.6","_where":"/home/morgan/Documents/electBdmer","bin":{"7z":"7zip-lite/7z.exe"},"bugs":{"url":"https://github.com/fritx/win-7zip/issues"},"description":"7zip Windows Package via Node.js","homepage":"https://github.com/fritx/win-7zip#readme","keywords":["7z","7zip","7-zip","windows","install"],"license":"GNU LGPL","main":"index.js","name":"7zip","repository":{"type":"git","url":"git+ssh://git@github.com/fritx/win-7zip.git"},"scripts":{"test":"mocha"},"version":"0.0.6"}
+module.exports = {"_args":[["7zip@0.0.6","/home/morgan/Documents/BDMER3Tools/electron"]],"_development":true,"_from":"7zip@0.0.6","_id":"7zip@0.0.6","_inBundle":false,"_integrity":"sha1-nK+xca+CMpSQNTtIFvAzR6oVCjA=","_location":"/7zip","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"7zip@0.0.6","name":"7zip","escapedName":"7zip","rawSpec":"0.0.6","saveSpec":null,"fetchSpec":"0.0.6"},"_requiredBy":["/electron-devtools-installer"],"_resolved":"https://registry.npmjs.org/7zip/-/7zip-0.0.6.tgz","_spec":"0.0.6","_where":"/home/morgan/Documents/BDMER3Tools/electron","bin":{"7z":"7zip-lite/7z.exe"},"bugs":{"url":"https://github.com/fritx/win-7zip/issues"},"description":"7zip Windows Package via Node.js","homepage":"https://github.com/fritx/win-7zip#readme","keywords":["7z","7zip","7-zip","windows","install"],"license":"GNU LGPL","main":"index.js","name":"7zip","repository":{"type":"git","url":"git+ssh://git@github.com/fritx/win-7zip.git"},"scripts":{"test":"mocha"},"version":"0.0.6"}
 
 /***/ }),
 /* 47 */
