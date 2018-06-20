@@ -6,7 +6,7 @@
             {{ $t("CONNECT_TO") }} <span class="blue--text">BDMER³</span>.
         </div>
         <v-divider></v-divider>
-        <v-form class="form" ref="form" v-model="valid" lazy-validation>
+        <v-form class="form" ref="form" v-model="valid"  v-on:submit.prevent="submit" lazy-validation>
           <v-text-field
          prepend-icon="link"
          v-model="user.url"
@@ -45,8 +45,10 @@
 </template>
 
 <script>
-import store from "@/store";
 import { required } from "vuelidate/lib/validators";
+import CryptoJS from "crypto-js";
+import config from "@/config";
+import Cookies from "js-cookie";
 
 export default {
 	data: () => ({
@@ -75,10 +77,8 @@ export default {
 			}
 		}
 	},
-	mounted: function() {
-		if (this.$store.getters["auth/getUserBdmer"].username !== undefined) {
-			this.user = this.$store.getters["auth/getUserBdmer"];
-		}
+	created: function() {
+		this.user = Cookies.get("userBdmer") ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("userBdmer").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8)) : {};
 	},
 	computed: {
 		isCompleted() {

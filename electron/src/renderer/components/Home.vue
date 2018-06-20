@@ -163,9 +163,26 @@ export default {
 			}
 		);
 
-		this.bdmerConnected = this.$store.getters["auth/getUserBdmer"].username !== undefined ? true : false;
-		this.odkConnected = this.$store.getters["auth/getUserODK"].username !== undefined ? true : false;
-		this.invalid = this.$store.getters["auth/getUserBdmer"].username !== undefined && this.$store.getters["auth/getUserODK"].username !== undefined ? false : true;
+		this.bdmerConnected =
+			this.$store.getters["auth/getUserBdmer"].username !== "" &&
+			this.$store.getters["auth/getUserBdmer"].password !== "" &&
+			this.$store.getters["auth/getUserBdmer"].url !== "" &&
+			this.$store.getters["auth/getUserBdmer"].username !== undefined &&
+			this.$store.getters["auth/getUserBdmer"].password !== undefined &&
+			this.$store.getters["auth/getUserBdmer"].url !== undefined
+				? true
+				: false;
+		this.odkConnected =
+			this.$store.getters["auth/getUserODK"].username !== "" &&
+			this.$store.getters["auth/getUserODK"].password !== "" &&
+			this.$store.getters["auth/getUserODK"].url !== "" &&
+			this.$store.getters["auth/getUserODK"].username !== undefined &&
+			this.$store.getters["auth/getUserODK"].password !== undefined &&
+			this.$store.getters["auth/getUserODK"].url !== undefined
+				? true
+				: false;
+
+		this.invalid = this.bdmerConnected && this.odkConnected ? false : true;
 		this.language = this.$i18n.locale;
 	},
 	methods: {

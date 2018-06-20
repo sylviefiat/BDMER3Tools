@@ -43,7 +43,7 @@ export default {
 	actions: {
 		import: ({ commit }, user) => {
 			commit("startLoader");
-
+			console.log(user);
 			sync
 				.seacuseyToBdmer(user)
 				.then(res => {

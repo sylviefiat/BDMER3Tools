@@ -6,7 +6,7 @@
             {{ $t("CONFIGURE") }} <span class="deep-orange--text">{{ $t("DB") }}</span>
         </div>
         <v-divider></v-divider>
-        <v-form class="form" ref="form" lazy-validation>
+        <v-form class="form" ref="form" v-on:submit.prevent="submit" lazy-validation>
 
          <v-text-field
          prepend-icon="save"
@@ -26,7 +26,7 @@
          required></v-text-field>
 
 
-          <v-btn block type="submit" :disabled="!isCompleted" class="primary" @click="submit">{{$t('SAVE')}}</v-btn>
+          <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SAVE')}}</v-btn>
           <v-btn flat small block to="home" color="red">{{$t('RETURN')}}</v-btn>
         </v-form>
       </v-flex>

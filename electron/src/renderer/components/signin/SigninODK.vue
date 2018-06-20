@@ -6,7 +6,7 @@
               {{ $t("CONNECT_TO") }} <span class="deep-orange--text">Seacusey surveys</span>.
         </div>
         <v-divider></v-divider>
-        <v-form class="form" ref="form" v-model="valid" lazy-validation>
+        <v-form class="form" ref="form" v-model="valid" v-on:submit.prevent="submit" lazy-validation>
           <v-text-field
          prepend-icon="link"
          v-model="user.url"
@@ -37,7 +37,7 @@
           :label="$t('PASSWORD')"
           required></v-text-field>
 
-          <v-btn block type="submit" :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
+          <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
           <v-btn flat small block to="home" color="red">{{$t('RETURN')}}</v-btn>
         </v-form>
       </v-flex>
@@ -46,8 +46,10 @@
 </template>
 
 <script>
-import store from "@/store";
 import { required } from "vuelidate/lib/validators";
+import CryptoJS from "crypto-js";
+import config from "@/config";
+import Cookies from "js-cookie";
 
 export default {
 	data: () => ({
@@ -112,10 +114,8 @@ export default {
 			return errors;
 		}
 	},
-	mounted: function() {
-		if (this.$store.getters["auth/getUserODK"].username !== undefined) {
-			this.user = this.$store.getters["auth/getUserODK"];
-		}
+	created: function() {
+		this.user = Cookies.get("userODK") ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("userODK").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8)) : {};
 	},
 	methods: {
 		submit() {

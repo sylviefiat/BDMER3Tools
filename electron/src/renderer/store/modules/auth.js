@@ -7,9 +7,10 @@ import config from "@/config";
 import * as auth from "@/authentification";
 
 const initialState = {
-	userBdmer: Cookies.get("userBdmer") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("userBdmer"), config.cryptoKey)) : null,
-	userODK: Cookies.get("userODK") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("userODK"), config.cryptoKey)) : null,
-	dbConfiguration: Cookies.get("dbConfiguration") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("dbConfiguration"), config.cryptoKey)) : null
+	userBdmer: Cookies.get("userBdmer") !== undefined ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("userBdmer").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8), config.cryptoKey) : null,
+	userODK: Cookies.get("userODK") !== undefined ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("userODK").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8), config.cryptoKey) : null,
+	dbConfiguration:
+		Cookies.get("dbConfiguration") !== undefined ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("dbConfiguration").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8), config.cryptoKey) : null
 };
 
 export default {
@@ -43,11 +44,13 @@ export default {
 				name: "Home"
 			});
 		},
-		signinErrors: (state, err) => {
-			if (err.status === 400 || err.status === 500 || err.status === 404) {
+		signinErrors: (state, data) => {
+			if (data.err.status === 400 || data.err.status === 500 || data.err.status === 404) {
 				state.urlError = true;
+				data.type === "ODK" ? (state.userODK = {}) : (state.userBdmer = {});
 			} else {
 				state.authError = true;
+				data.type === "ODK" ? ((state.userODK.username = ""), (state.userODK.password = "")) : ((state.userBdmer.username = ""), (state.userBdmer.password = ""));
 			}
 		},
 		resetUrlError: state => {
@@ -92,7 +95,7 @@ export default {
 					commit("signinBdmer", user);
 				})
 				.catch(err => {
-					commit("signinErrors", err);
+					commit("signinErrors", { err: err, type: "Bdmer" });
 				});
 		},
 		signinODK: ({ commit }, user) => {
@@ -102,7 +105,7 @@ export default {
 					commit("signinODK", user);
 				})
 				.catch(err => {
-					commit("signinErrorsODK", err);
+					commit("signinErrorsODK", { err: err, type: "ODK" });
 				});
 		},
 		resetAuthError: ({ commit }) => {
