@@ -3,7 +3,7 @@
     <v-layout justify-center>
       <v-flex md5 sm8 xs10>
         <div class="display-2">
-              {{ $t("CONNECT_TO") }} <span class="deep-orange--text">Seacusey surveys</span>.
+              {{ $t("CONNECT_TO") }} <span class="deep-orange--text">Seacusey surveys</span> (Api).
         </div>
         <v-divider></v-divider>
         <v-form class="form" ref="form" v-model="valid" v-on:submit.prevent="submit" lazy-validation>
@@ -12,7 +12,7 @@
          v-model="user.url"
          label="Url "
          :error-messages="hasUrlError"
-         hint="ex: 193.55.100.40:5555"
+         hint="ex: http://entropie-dev.ird.nc:3000"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
          required></v-text-field>
@@ -37,7 +37,7 @@
           :label="$t('PASSWORD')"
           required></v-text-field>
 
-          <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
+          <v-btn block type="submit" :disabled="!isCompleted" class="primary" @click="submit">{{$t('SIGNIN')}}</v-btn>
           <v-btn flat small block to="home" color="red">{{$t('RETURN')}}</v-btn>
         </v-form>
       </v-flex>
@@ -115,7 +115,9 @@ export default {
 		}
 	},
 	created: function() {
-		this.user = Cookies.get("userODK") ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("userODK").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8)) : {};
+		this.user.url = this.$store.getters["auth/getUserODK"].url;
+		this.user.username = this.$store.getters["auth/getUserODK"].username;
+		this.user.password = this.$store.getters["auth/getUserODK"].password;
 	},
 	methods: {
 		submit() {

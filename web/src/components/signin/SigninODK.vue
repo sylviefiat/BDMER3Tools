@@ -1,18 +1,18 @@
 <template>
   <v-container fluid fill-height>
     <v-layout justify-center>
-      <v-flex md4 sm6 xs10>
+      <v-flex md5 sm8 xs10>
         <div class="display-2">
-              {{ $t("CONNECT_TO") }} <span class="deep-orange--text">Seacusey surveys</span>.
+              {{ $t("CONNECT_TO") }} <span class="deep-orange--text">Seacusey surveys</span> (Api).
         </div>
         <v-divider></v-divider>
-        <v-form class="form" ref="form" v-model="valid" lazy-validation>
+        <v-form class="form" ref="form" v-model="valid" v-on:submit.prevent="submit" lazy-validation>
           <v-text-field
          prepend-icon="link"
          v-model="user.url"
          label="Url "
          :error-messages="hasUrlError"
-         hint="ex: 193.55.100.40:5555"
+         hint="ex: http://entropie-dev.ird.nc:3000"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
          required></v-text-field>
@@ -46,8 +46,10 @@
 </template>
 
 <script>
-import store from "@/store";
 import { required } from "vuelidate/lib/validators";
+import CryptoJS from "crypto-js";
+import config from "@/config";
+import Cookies from "js-cookie";
 
 export default {
   data: () => ({
@@ -112,10 +114,10 @@ export default {
       return errors;
     }
   },
-  mounted: function() {
-    if (this.$store.getters["auth/getUserODK"].username !== undefined) {
-      this.user = this.$store.getters["auth/getUserODK"];
-    }
+  created: function() {
+    this.user.url = this.$store.getters["auth/getUserODK"].url;
+    this.user.username = this.$store.getters["auth/getUserODK"].username;
+    this.user.password = this.$store.getters["auth/getUserODK"].password;
   },
   methods: {
     submit() {

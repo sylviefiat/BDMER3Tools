@@ -26,7 +26,7 @@
          required></v-text-field>
 
 
-          <v-btn block :disabled="!isCompleted" class="primary" @click="submit">{{$t('SAVE')}}</v-btn>
+          <v-btn block type="submit" :disabled="!isCompleted" class="primary" @click="submit">{{$t('SAVE')}}</v-btn>
           <v-btn flat small block to="home" color="red">{{$t('RETURN')}}</v-btn>
         </v-form>
       </v-flex>
@@ -55,10 +55,9 @@ export default {
 			}
 		}
 	},
-	mounted: function() {
-		if (this.$store.getters["auth/getDbConfiguration"].db !== undefined) {
-			this.dbConfiguration = this.$store.getters["auth/getDbConfiguration"];
-		}
+	created: function() {
+		this.dbConfiguration.schema = this.$store.getters["auth/getDbConfiguration"].schema;
+		this.dbConfiguration.db = this.$store.getters["auth/getDbConfiguration"].db;
 	},
 	computed: {
 		isCompleted() {

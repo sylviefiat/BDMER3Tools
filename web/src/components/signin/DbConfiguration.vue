@@ -1,12 +1,12 @@
 <template>
   <v-container fluid fill-height>
     <v-layout justify-center>
-      <v-flex md4 sm6 xs10>
+      <v-flex md5 sm8 xs10>
         <div class="display-2">
             {{ $t("CONFIGURE") }} <span class="deep-orange--text">{{ $t("DB") }}</span>
         </div>
         <v-divider></v-divider>
-        <v-form class="form" ref="form" lazy-validation>
+        <v-form class="form" ref="form" v-on:submit.prevent="submit" lazy-validation>
 
          <v-text-field
          prepend-icon="save"
@@ -55,10 +55,9 @@ export default {
       }
     }
   },
-  mounted: function() {
-    if (this.$store.getters["auth/getDbConfiguration"].db !== undefined) {
-      this.dbConfiguration = this.$store.getters["auth/getDbConfiguration"];
-    }
+  created: function() {
+    this.dbConfiguration.schema = this.$store.getters["auth/getDbConfiguration"].schema;
+    this.dbConfiguration.db = this.$store.getters["auth/getDbConfiguration"].db;
   },
   computed: {
     isCompleted() {

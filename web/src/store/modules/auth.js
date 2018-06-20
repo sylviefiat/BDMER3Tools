@@ -1,14 +1,15 @@
+import axios from "axios";
 import router from "@/router";
 import store from "@/store";
 import Cookies from "js-cookie";
-import CryptoJS from "crypto-js";
-import config from "@/config";
+import ls from "@/services/ls.js";
 import * as auth from "@/authentification";
+import config from "@/config";
 
 const initialState = {
-  userBdmer: Cookies.get("userBdmer") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("userBdmer"), config.cryptoKey)) : null,
-  userODK: Cookies.get("userODK") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("userODK"), config.cryptoKey)) : null,
-  dbConfiguration: Cookies.get("dbConfiguration") !== undefined ? toString(CryptoJS.AES.decrypt(Cookies.get("dbConfiguration"), config.cryptoKey)) : null
+  userBdmer: ls.get("userBdmer"),
+  userODK: ls.get("userODK"),
+  dbConfiguration: ls.get("dbConfiguration")
 };
 
 export default {
@@ -27,7 +28,7 @@ export default {
     signinBdmer: (state, user) => {
       state.connected = true;
       state.userBdmer = user;
-      Cookies.set("userBdmer", CryptoJS.AES.encrypt(JSON.stringify(user), config.cryptoKey));
+      ls.set("userBdmer", user);
       router.push({
         name: "Home"
       });
@@ -37,16 +38,18 @@ export default {
     },
     signinODK: (state, user) => {
       state.userODK = user;
-      Cookies.set("userODK", CryptoJS.AES.encrypt(JSON.stringify(user), config.cryptoKey));
+      ls.set("userODK", user);
       router.push({
         name: "Home"
       });
     },
-    signinErrors: (state, err) => {
-      if (err.status === 400 || err.status === 500 || err.status === 404) {
+    signinErrors: (state, data) => {
+      if (data.err.status === 400 || data.err.status === 500 || data.err.status === 404) {
         state.urlError = true;
+        data.type === "ODK" ? (state.userODK = {}) : (state.userBdmer = {});
       } else {
         state.authError = true;
+        data.type === "ODK" ? ((state.userODK.username = ""), (state.userODK.password = "")) : ((state.userBdmer.username = ""), (state.userBdmer.password = ""));
       }
     },
     resetUrlError: state => {
@@ -57,7 +60,7 @@ export default {
     },
     saveDbConfiguration: (state, dbConfiguration) => {
       state.dbConfiguration = dbConfiguration;
-      Cookies.set("dbConfiguration", CryptoJS.AES.encrypt(JSON.stringify(dbConfiguration), config.cryptoKey));
+      ls.set("dbConfiguration", dbConfiguration);
       router.push({
         name: "Home"
       });
@@ -91,7 +94,7 @@ export default {
           commit("signinBdmer", user);
         })
         .catch(err => {
-          commit("signinErrors", err);
+          commit("signinErrors", { err: err, type: "Bdmer" });
         });
     },
     signinODK: ({ commit }, user) => {
@@ -101,7 +104,7 @@ export default {
           commit("signinODK", user);
         })
         .catch(err => {
-          commit("signinErrorsODK", err);
+          commit("signinErrorsODK", { err: err, type: "ODK" });
         });
     },
     resetAuthError: ({ commit }) => {

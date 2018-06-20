@@ -11,6 +11,7 @@
          prepend-icon="link"
          v-model="user.url"
          label="Url "
+         hint="ex: http://bdmer3.ird.nc:5984"
          :error-messages="hasUrlError"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
@@ -78,7 +79,9 @@ export default {
 		}
 	},
 	created: function() {
-		this.user = Cookies.get("userBdmer") ? JSON.parse(CryptoJS.AES.decrypt(Cookies.get("userBdmer").toString(), config.cryptoKey).toString(CryptoJS.enc.Utf8)) : {};
+		this.user.url = this.$store.getters["auth/getUserBdmer"].url;
+		this.user.username = this.$store.getters["auth/getUserBdmer"].username;
+		this.user.password = this.$store.getters["auth/getUserBdmer"].password;
 	},
 	computed: {
 		isCompleted() {
