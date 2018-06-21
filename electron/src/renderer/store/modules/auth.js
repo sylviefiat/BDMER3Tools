@@ -92,6 +92,7 @@ export default {
 					commit("signinBdmer", user);
 				})
 				.catch(err => {
+					console.log(err);
 					commit("signinErrors", { err: err, type: "Bdmer" });
 				});
 		},
