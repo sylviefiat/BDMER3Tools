@@ -11,7 +11,8 @@
           <v-btn class="btn-import" :color="bdmerConnected ? 'success' : 'primary'" to="signinBdmer" block @click="clear">{{ $t("CONNECT_TO") }} BDMER³  <v-icon right v-if="bdmerConnected">check</v-icon></v-btn>
         </div>
 
-        <p> {{ $t("IMPORT_DESCRIPTION") }} </p>
+        <p class="description"> {{ $t("IMPORT_DESCRIPTION") }} </p>
+
         <v-tooltip bottom>
           <v-btn slot="activator" class="btn-import" color="primary" :disabled="invalid" block @click="importData">{{ $t("SYNC_BUTTON") }}</v-btn>
           <span v-if="invalid">{{$t('SYNC_TOOLTIP')}}</span>
@@ -217,6 +218,10 @@ export default {
 </script>
 
 <style>
+.description {
+	margin-top: 40px;
+	text-align: justify;
+}
 .display-2 {
 	margin-bottom: 30px;
 }
