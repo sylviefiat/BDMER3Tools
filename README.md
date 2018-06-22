@@ -1,4 +1,4 @@
-# electbdmer
+# BDMER3Tools
 
 > An electron-vue project
 
