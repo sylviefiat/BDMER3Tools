@@ -4,17 +4,40 @@
 
 #### Build Setup
 
+## Install dependencies
+
 ``` bash
-# install dependencies
 npm install
+```
 
-# serve with hot reload at localhost:9080
+## Serve with hot reload at localhost:9080
+
+``` bash
 npm run dev
+```
 
-# build electron application for production
+## Build electron application for linux
+
+``` bash
 npm run build
+```
 
+## Build electron application for windows on ubuntu
 
+### You need [whineHQ](https://wiki.winehq.org/Ubuntu)
+
+``` bash
+sudo dpkg --add-architecture i386 
+wget -nc https://dl.winehq.org/wine-builds/Release.key
+sudo apt-key add Release.key
+sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
+sudo apt-get update
+```
+
+### Then you can build your app
+
+``` bash
+npm run pack-win
 ```
 
 ---
