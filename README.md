@@ -1,6 +1,6 @@
 # BDMER3Tools
 
-> An electron-vue project
+BDMER3Tools is an application which convert data from holothurias fishers forms done with open data kit as part of project seacusey. These data will be convert then sent to bdmer3 application used for the holothurias fisheries management.
 
 #### Build Setup
 
