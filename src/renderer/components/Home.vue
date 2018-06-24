@@ -2,13 +2,19 @@
 <v-container fluid fill-height>
   <v-layout justify-center>
     <v-flex md5 sm8 xs10>
-      <div class="display-2"> {{ $t("SYNC") }}  <span class="deep-orange--text">Seacusey surveys</span> {{ $t("WITH") }} <span class="blue--text">BDMER³</span>.</div>
+      <div class="display-2"> {{ $t("SYNC") }} <span class="deep-orange--text">Seacusey surveys</span> {{ $t("WITH") }} <span class="blue--text">BDMER³</span>.</div>
       <v-divider></v-divider>
       <div class="importation" v-if="!importation">
         <div>
-          <v-btn class="btn-import" :color="odkConnected ? 'success' : 'primary'" to="signinODK" block @click="clear">{{ $t("CONNECT_TO") }} Seacusey surveys <v-icon right v-if="odkConnected">check</v-icon></v-btn>
-          <v-btn flat icon color="success" to="dbConfiguration"><v-icon>settings</v-icon></v-btn> <span class="redirect" @click="to('dbConfiguration')">{{ $t("CONFIGURE_DB_SCHEMA") }} </span>
-          <v-btn class="btn-import" :color="bdmerConnected ? 'success' : 'primary'" to="signinBdmer" block @click="clear">{{ $t("CONNECT_TO") }} BDMER³  <v-icon right v-if="bdmerConnected">check</v-icon></v-btn>
+          <v-btn class="btn-import" :color="odkConnected ? 'success' : 'primary'" to="signinODK" block @click="clear">{{ $t("CONNECT_TO") }} Seacusey surveys
+            <v-icon right v-if="odkConnected">check</v-icon>
+          </v-btn>
+          <v-btn flat icon color="success" to="dbConfiguration">
+            <v-icon>settings</v-icon>
+          </v-btn> <span class="redirect" @click="to('dbConfiguration')">{{ $t("CONFIGURE_DB_SCHEMA") }} </span>
+          <v-btn class="btn-import" :color="bdmerConnected ? 'success' : 'primary'" to="signinBdmer" block @click="clear">{{ $t("CONNECT_TO") }} BDMER³
+            <v-icon right v-if="bdmerConnected">check</v-icon>
+          </v-btn>
         </div>
 
         <p class="description"> {{ $t("IMPORT_DESCRIPTION") }} </p>
@@ -25,19 +31,26 @@
           <v-progress-linear :indeterminate="true"></v-progress-linear>
           <p> {{ $t("IMPORTATION") }} </p>
         </div>
-        <div v-if="!isLoading">
 
+        <div v-if="errorOdk || errorBdmer">
+          <v-alert v-model="errorOdk" class="alert" type="error">
+            {{ $t("ERROR_CONNECT_ODK") }}
+          </v-alert>
+
+          <v-alert v-model="errorBdmer" class="alert" type="error">
+            {{ $t("ERROR_CONNECT_BDMER") }}
+          </v-alert>
+
+          <v-btn class="btn-go-back" color="primary" block @click="clear">{{ $t("GO_BACK_TO_SYNC") }}</v-btn>
+        </div>
+
+        <div v-if="!isLoading && !errorOdk && !errorBdmer">
           <v-alert v-model="alertSuccess" class="alert" type="success">
             {{success.length}} {{ $t("IMPORT_SUCCESS") }}
             <a @click="displaySuccess = !displaySuccess">{{ $t("DISPLAY_SUCCESS") }} </a>
           </v-alert>
 
-          <v-data-table
-            v-if="displaySuccess"
-            :headers="headersSuccess"
-            :items="success"
-            class="elevation-1"
-          >
+          <v-data-table v-if="displaySuccess" :headers="headersSuccess" :items="success" class="elevation-1">
             <template slot="items" slot-scope="props">
               <td>
                 {{props.item.success}}
@@ -53,12 +66,7 @@
             <a @click="displayWarnings = !displayWarnings">{{ $t("DISPLAY_WARNING") }} </a>
           </v-alert>
 
-          <v-data-table
-            v-if="displayWarnings"
-            :headers="headersWarnings"
-            :items="warnings"
-            class="elevation-1"
-          >
+          <v-data-table v-if="displayWarnings" :headers="headersWarnings" :items="warnings" class="elevation-1">
             <template slot="items" slot-scope="props">
               <td>
                 {{props.item.warning}}
@@ -72,11 +80,7 @@
             {{ $t("IMPORT_FAIL") }}
           </v-alert>
 
-          <v-data-table
-            :headers="headersErrors"
-            :items="errors"
-            class="elevation-1"
-          >
+          <v-data-table :headers="headersErrors" :items="errors" class="elevation-1">
             <template slot="items" slot-scope="props">
               <td>
                 {{props.item.error}}
@@ -85,7 +89,6 @@
               <td>{{ props.item.msg }}</td>
             </template>
           </v-data-table>
-
 
           <v-btn class="btn-go-back" color="primary" block @click="clear">{{ $t("GO_BACK_TO_SYNC") }}</v-btn>
         </div>
@@ -117,9 +120,38 @@ export default {
 		displayWarnings: false,
 		displaySuccess: false,
 		isLoading: false,
-		headersErrors: [{ text: "Error on", value: "error" }, { text: "Description", value: "msg" }],
-		headersWarnings: [{ text: "Warning on", value: "warning" }, { text: "Description", value: "msg" }],
-		headersSuccess: [{ text: "Row", value: "success" }, { text: "Description", value: "msg" }]
+		errorBdmer: false,
+		errorOdk: false,
+		headersErrors: [
+			{
+				text: "Error on",
+				value: "error"
+			},
+			{
+				text: "Description",
+				value: "msg"
+			}
+		],
+		headersWarnings: [
+			{
+				text: "Warning on",
+				value: "warning"
+			},
+			{
+				text: "Description",
+				value: "msg"
+			}
+		],
+		headersSuccess: [
+			{
+				text: "Row",
+				value: "success"
+			},
+			{
+				text: "Description",
+				value: "msg"
+			}
+		]
 	}),
 	mounted: function() {
 		this.$store.watch(
@@ -128,6 +160,21 @@ export default {
 				this.isLoading = res;
 			}
 		);
+
+		this.$store.watch(
+			() => this.$store.getters["importation/hasErrorBdmer"],
+			res => {
+				this.errorBdmer = res;
+			}
+		);
+
+		this.$store.watch(
+			() => this.$store.getters["importation/hasErrorOdk"],
+			res => {
+				this.errorOdk = res;
+			}
+		);
+
 		this.$store.watch(
 			() => this.$store.getters["importation/hasErrors"],
 			res => {
@@ -173,6 +220,7 @@ export default {
 			this.$store.getters["auth/getUserBdmer"].url !== undefined
 				? true
 				: false;
+
 		this.odkConnected =
 			this.$store.getters["auth/getUserODK"].username !== "" &&
 			this.$store.getters["auth/getUserODK"].password !== "" &&
@@ -222,6 +270,7 @@ export default {
 	margin-top: 40px;
 	text-align: justify;
 }
+
 .display-2 {
 	margin-bottom: 30px;
 }
@@ -230,6 +279,7 @@ export default {
 	margin-top: 30px;
 	margin-bottom: 15px;
 }
+
 .importation {
 	margin-top: 30px;
 }

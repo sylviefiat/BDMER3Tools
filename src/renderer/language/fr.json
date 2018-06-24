@@ -8,7 +8,8 @@
 	"USERNAME_PW_ERROR": "Nom d'utilisateur ou mot de passe incorrect",
 	"REQUIRED": "Champs requis",
 	"IMPORT": "Importer les données de ODK vers BDMER³",
-	"IMPORT_DESCRIPTION": "BDMER3Tools est une application qui permet de convertir des données issue des formulaires des pêcheurs d'holothuries fait avec Open Data Kit dans le cadre du projet Seacusey. Ces données vont être converties puis envoyées dans l'application Bdmer3 utilisée pour la gestion des pêcheries d'holothuries.",
+	"IMPORT_DESCRIPTION":
+		"BDMER3Tools est une application qui permet de convertir des données issues des formulaires des pêcheurs d'holothuries remplis avec Open Data Kit dans le cadre du projet Seacusey. Ces données vont être converties puis envoyées dans l'application Bdmer3, destinée à la gestion des pêcheries d'holothuries.",
 	"SYNC_BUTTON": "Lancer la importation !",
 	"IMPORTATION": "Nous sommes en train d'importer vos données...",
 	"IMPORT_SUCCESS": " éléments ont étés importés avec succès !",
@@ -30,5 +31,7 @@
 	"DISPLAY_WARNING": "Afficher les warnings",
 	"DISPLAY_SUCCESS": "Afficher les success",
 	"ONLINE": "Vous êtes connecté à internet !",
-	"OFFLINE": "Vous n'avez pas de connexion à internet ! Reconnectez vous pour utiliser l'application."
+	"OFFLINE": "Vous n'avez pas de connexion à internet ! Reconnectez vous pour utiliser l'application.",
+	"ERROR_CONNECT_ODK": "Connexion à Seacusey impossible.",
+	"ERROR_CONNECT_BDMER": "Connexion à Bdmer impossible."
 }

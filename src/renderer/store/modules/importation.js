@@ -13,7 +13,9 @@ export default {
 		loading: false,
 		errors: [],
 		warnings: [],
-		success: []
+		success: [],
+		errorBdmer: false,
+		errorOdk: false
 	},
 	mutations: {
 		importSuccess: (state, data) => {
@@ -22,8 +24,15 @@ export default {
 			state.warnings = data.warnings;
 			state.success = data.success;
 		},
-		startLoader: state => {
+		importErr: (state, err) => {
+			state.loading = false;
+			state.errorBdmer = err.type === "bdmer" ? true : false;
+			state.errorOdk = err.type === "odk" ? true : false;
+		},
+		startImport: state => {
 			state.loading = true;
+			state.errorBdmer = false;
+			state.errorOdk = false;
 		}
 	},
 	getters: {
@@ -38,18 +47,24 @@ export default {
 		},
 		hasSuccess: state => {
 			return state.success;
+		},
+		hasErrorOdk: state => {
+			return state.errorOdk;
+		},
+		hasErrorBdmer: state => {
+			return state.errorBdmer;
 		}
 	},
 	actions: {
 		import: ({ commit }, user) => {
-			commit("startLoader");
+			commit("startImport");
 			sync
 				.seacuseyToBdmer(user)
 				.then(res => {
 					commit("importSuccess", res);
 				})
 				.catch(err => {
-					console.log(err);
+					commit("importErr", err);
 				});
 		}
 	}

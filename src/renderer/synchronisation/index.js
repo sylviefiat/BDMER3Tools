@@ -176,15 +176,15 @@ function synchronize(user) {
 													}
 												}
 											})
-											.catch(err => reject(err));
+											.catch(err => reject({ err: err, type: "bdmer" }));
 									}
 								})
-								.catch(err => reject(err));
+								.catch(err => reject({ err: err, type: "odk" }));
 						}
 					})
-					.catch(err => reject(err));
+					.catch(err => reject({ err: err, type: "bdmer" }));
 			})
-			.catch(err => reject(err));
+			.catch(err => reject({ err: err, type: "odk" }));
 	});
 }
 

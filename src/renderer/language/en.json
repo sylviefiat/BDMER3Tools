@@ -8,7 +8,8 @@
 	"USERNAME_PW_ERROR": "Username or password invalid",
 	"REQUIRED": "Field required",
 	"IMPORT": "Import data from ODK to BDMER³",
-	"IMPORT_DESCRIPTION": "BDMER3Tools is an application which convert data from holothurias fishers forms done with Open Data Kit as part of project Seacusey. These data will be convert then sent to Bdmer3 application used for the holothurias fisheries management.",
+	"IMPORT_DESCRIPTION":
+		"BDMER3Tools is an application which aims to convert data from holothurias fishers forms filled with Open Data Kit as part of project Seacusey. These data will be converted then inserted to Bdmer3 application, made for the holothurias fisheries management.",
 	"SYNC_BUTTON": "Begin synchronization !",
 	"IMPORTATION": "We are importing your data...",
 	"IMPORT_SUCCESS": " elements have been imported with success !",
@@ -30,5 +31,7 @@
 	"DISPLAY_WARNING": "Display warnings",
 	"DISPLAY_SUCCESS": "Display success",
 	"ONLINE": "You are online !",
-	"OFFLINE": "You are offline ! Reconnect to use application."
+	"OFFLINE": "You are offline ! Reconnect to use application.",
+	"ERROR_CONNECT_ODK": "Connection to Seacusey impossible.",
+	"ERROR_CONNECT_BDMER": "Connection to Bdmer impossible."
 }
