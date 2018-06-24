@@ -15,7 +15,8 @@ export default {
 		warnings: [],
 		success: [],
 		errorBdmer: false,
-		errorOdk: false
+		errorOdk: false,
+		errorBdmerTable: false
 	},
 	mutations: {
 		importSuccess: (state, data) => {
@@ -25,13 +26,19 @@ export default {
 			state.success = data.success;
 		},
 		importErr: (state, err) => {
+			if (err.err.type === "table") {
+				state.errorBdmerTable = true;
+			} else {
+				state.errorBdmer = err.type === "bdmer" ? true : false;
+				state.errorOdk = err.type === "odk" ? true : false;
+			}
+
 			state.loading = false;
-			state.errorBdmer = err.type === "bdmer" ? true : false;
-			state.errorOdk = err.type === "odk" ? true : false;
 		},
 		startImport: state => {
 			state.loading = true;
 			state.errorBdmer = false;
+			state.errorBdmerTable = false;
 			state.errorOdk = false;
 		}
 	},
@@ -53,6 +60,9 @@ export default {
 		},
 		hasErrorBdmer: state => {
 			return state.errorBdmer;
+		},
+		hasErrorBdmerTable: state => {
+			return state.errorBdmerTable;
 		}
 	},
 	actions: {

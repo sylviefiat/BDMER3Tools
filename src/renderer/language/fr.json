@@ -33,5 +33,6 @@
 	"ONLINE": "Vous êtes connecté à internet !",
 	"OFFLINE": "Vous n'avez pas de connexion à internet ! Reconnectez vous pour utiliser l'application.",
 	"ERROR_CONNECT_ODK": "Connexion à Seacusey impossible.",
-	"ERROR_CONNECT_BDMER": "Connexion à Bdmer impossible."
+	"ERROR_CONNECT_BDMER": "Connexion à Bdmer impossible.",
+	"ERROR_CONNECT_BDMER_TABLE": "Il semblerait que la base de donnée que vous essayez d'atteindre ne soit pas formatée correctement."
 }

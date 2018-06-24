@@ -394,7 +394,7 @@ function getAllSpecies(url) {
 				resolve(doc.rows);
 			})
 			.catch(function(err) {
-				reject(err);
+				reject({ err: err, type: "table" });
 			});
 	});
 }
@@ -406,7 +406,7 @@ function getAllSpecies(url) {
 */
 function checkPlatformExist(url, data) {
 	return new Promise(function(resolve, reject) {
-		let db = new PouchDB(url + "/platforms", {
+		let db = new PouchDB(url + "/platfqsdorms", {
 			skip_setup: true
 		});
 
@@ -415,7 +415,11 @@ function checkPlatformExist(url, data) {
 				resolve(doc);
 			})
 			.catch(function(err) {
-				resolve(err);
+				if (err.message === "Database does not exist.") {
+					reject({ err: err, type: "table" });
+				} else {
+					resolve(err);
+				}
 			});
 	});
 }
