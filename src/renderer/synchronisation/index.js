@@ -406,7 +406,7 @@ function getAllSpecies(url) {
 */
 function checkPlatformExist(url, data) {
 	return new Promise(function(resolve, reject) {
-		let db = new PouchDB(url + "/platfqsdorms", {
+		let db = new PouchDB(url + "/platforms", {
 			skip_setup: true
 		});
 

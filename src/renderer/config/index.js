@@ -1,1 +1,1 @@
- const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: 'QPeL3bdGLIUf11cInt5NFoOxx77IAoEBOY13d45SxKunM7dkI1B2ubLaJHm8KMze' }; export default config; 
+ const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: 'K1e6jsFyv2nbmPJHhj79hVyub3S5kAc3HPReH2yApbTEmfO1CKHmM8xPIP3X1hNT' }; export default config; 
