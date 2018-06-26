@@ -1,18 +1,21 @@
 {
 	"name": "BDMER3Tools",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"author": "MorganDbs <mailmorgandubois@gmail.com>",
 	"description": "An electron-vue project",
 	"license": null,
 	"main": "./dist/electron/main.js",
 	"scripts": {
-		"pack-win": "echo \" const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: '$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)' }; export default config; \" > src/renderer/config/index.js && build --dir --win",
-		"build": "echo \" const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: '$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)' }; export default config; \" > src/renderer/config/index.js && npm run package",
+		"pack-win":
+			"echo \" const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: '$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)' }; export default config; \" > src/renderer/config/index.js && build --dir --win",
+		"build":
+			"echo \" const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: '$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)' }; export default config; \" > src/renderer/config/index.js && npm run package",
 		"package": "node .electron-vue/build.js && electron-builder",
 		"build:dir": "node .electron-vue/build.js && electron-builder --dir",
 		"build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
 		"build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
-		"dev": "echo \" const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: '$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)' }; export default config; \" > src/renderer/config/index.js && node .electron-vue/dev-runner.js",
+		"dev":
+			"echo \" const config = { dbName: 'aggregate', schema: 'odk_prod', cryptoKey: '$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)' }; export default config; \" > src/renderer/config/index.js && node .electron-vue/dev-runner.js",
 		"pack": "npm run pack:main && npm run pack:renderer",
 		"pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
 		"pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
@@ -27,9 +30,7 @@
 		"directories": {
 			"output": "build"
 		},
-		"files": [
-			"dist/electron/**/*"
-		],
+		"files": ["dist/electron/**/*"],
 		"dmg": {
 			"contents": [
 				{

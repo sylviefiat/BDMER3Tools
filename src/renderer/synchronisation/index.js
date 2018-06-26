@@ -423,17 +423,33 @@ function checkPlatformExist(url, data) {
 			skip_setup: true
 		});
 
-		db.get(data.META_INSTANCE_NAME.split("-")[0])
+		db.allDocs({
+			include_docs: true
+		})
 			.then(function(doc) {
-				resolve(doc);
+				let names = [];
+				for (let row of doc.rows) {
+					if (row.id.toUpperCase() === data.META_INSTANCE_NAME.split("-")[0].toUpperCase()) {
+						resolve(row.doc);
+					}
+
+					if (row === doc.rows[doc.rows.length - 1]) {
+						resolve({
+							docId: data.META_INSTANCE_NAME.split("-")[0],
+							error: "not_found",
+							message: "missing",
+							name: "not_found",
+							reason: "missing",
+							status: 404
+						});
+					}
+				}
 			})
 			.catch(function(err) {
-				if (err.message === "Database does not exist.") {
-					reject({ err: err, type: "table", table: "platforms" });
-				} else if (err.code === "ECONNREFUSED") {
+				if (err.code === "ECONNREFUSED") {
 					reject({ err: err, type: "connection" });
 				} else {
-					resolve(err);
+					reject({ err: err, type: "table", table: "platforms" });
 				}
 			});
 	});

@@ -13,7 +13,7 @@
 	"SYNC_BUTTON": "Begin synchronization !",
 	"IMPORTATION": "We are importing your data...",
 	"IMPORT_SUCCESS": " elements have been imported with success !",
-	"IMPORT_FAIL": "Your importation has failed, check errors just below.",
+	"IMPORT_FAIL": "Your importation has errors, check errors just below.",
 	"GO_BACK_TO_SYNC": "Go back to synchronisation",
 	"DATABASE_CONFIGURATION": "Database configuration",
 	"LANGUAGE": "Language",
