@@ -97,7 +97,6 @@ export default {
 				});
 		},
 		signinODK: ({ commit }, user) => {
-			console.log(config);
 			auth
 				.signinODK(user)
 				.then(res => {

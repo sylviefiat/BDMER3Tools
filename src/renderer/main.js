@@ -9,6 +9,16 @@ import App from "./App";
 import router from "./router";
 import store from "./store";
 
+import { remote } from "electron";
+
+remote.globalShortcut.register("control+shift+k", () => {
+	remote.BrowserWindow.getFocusedWindow().webContents.openDevTools();
+});
+
+window.addEventListener("beforeunload", () => {
+	remote.globalShortcut.unregisterAll();
+});
+
 if (!process.env.IS_WEB) Vue.use(require("vue-electron"));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;

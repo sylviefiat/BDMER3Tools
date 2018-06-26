@@ -42,13 +42,11 @@ function updateBdmer(platforms, user) {
 					for (let row of plat.rows) {
 						success.push({ success: row.META_INSTANCE_NAME, msg: "Imported with success" });
 					}
-					console.log(response);
 					if (platforms[platforms.length - 1] === plat) {
 						resolve({ errors: errors, success: success });
 					}
 				})
 				.catch(err => {
-					console.log(err);
 					errors.push({
 						error: plat.code,
 						msg: "Couldnt be inserted in database"
@@ -115,6 +113,9 @@ function synchronize(user) {
 														error: data.data[0].META_INSTANCE_NAME.split("-")[0],
 														msg: "Platform not found"
 													});
+													if (table === tables[tables.length - 1]) {
+														resolve({ errors: errors, warnings: warnings, platforms: platforms });
+													}
 												} else {
 													// Browsing each row of the table
 													for (let row of data.data) {
@@ -212,6 +213,10 @@ function createStation(data, platform) {
 		codePlatform: platform.code
 	};
 
+	if (!platform.stations) {
+		return { err: true, msg: "Platform has no station array in db" };
+	}
+
 	if (data.META_INSTANCE_NAME === null || data.META_INSTANCE_NAME === "") {
 		return { err: true, msg: "No name provided" };
 	} else {
@@ -282,6 +287,10 @@ function createSurvey(data, platform) {
 		codeCountry: platform.codeCountry,
 		counts: []
 	};
+
+	if (!platform.surveys) {
+		return { err: true, msg: "Platform has no survey array in db" };
+	}
 
 	if (data.META_INSTANCE_NAME === null || data.META_INSTANCE_NAME === "") {
 		return { err: true, msg: "No name provided" };
@@ -394,7 +403,11 @@ function getAllSpecies(url) {
 				resolve(doc.rows);
 			})
 			.catch(function(err) {
-				reject({ err: err, type: "table" });
+				if (err.code === "ECONNREFUSED") {
+					reject({ err: err, type: "connection" });
+				} else {
+					reject({ err: err, type: "table", table: "species" });
+				}
 			});
 	});
 }
@@ -416,7 +429,9 @@ function checkPlatformExist(url, data) {
 			})
 			.catch(function(err) {
 				if (err.message === "Database does not exist.") {
-					reject({ err: err, type: "table" });
+					reject({ err: err, type: "table", table: "platforms" });
+				} else if (err.code === "ECONNREFUSED") {
+					reject({ err: err, type: "connection" });
 				} else {
 					resolve(err);
 				}

@@ -16,6 +16,7 @@ export function signinODK(user) {
 				}
 			})
 			.catch(error => {
+				console.log(error);
 				reject(false);
 			});
 	});
@@ -29,8 +30,10 @@ export function signinBdmer(user) {
 
 		db.logIn(user.username, user.password, (err, response) => {
 			if (err) {
+				console.log(err);
 				reject(err);
 			} else {
+				console.log(response);
 				resolve(response);
 			}
 		});

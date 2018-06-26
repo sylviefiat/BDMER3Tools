@@ -32,7 +32,7 @@
           <p> {{ $t("IMPORTATION") }} </p>
         </div>
 
-        <div v-if="errorOdk || errorBdmer || errorBdmerTable">
+        <div v-if="errorOdk || errorBdmer || errorBdmerPlatforms || errorBdmerSpecies">
           <v-alert v-model="errorOdk" class="alert" type="error">
             {{ $t("ERROR_CONNECT_ODK") }}
           </v-alert>
@@ -41,14 +41,18 @@
             {{ $t("ERROR_CONNECT_BDMER") }}
           </v-alert>
 
-          <v-alert v-model="errorBdmerTable" class="alert" type="error">
-            {{ $t("ERROR_CONNECT_BDMER_TABLE") }}
+          <v-alert v-model="errorBdmerSpecies" class="alert" type="error">
+            {{ $t("ERROR_CONNECT_BDMER_SPECIES") }}
+          </v-alert>
+
+          <v-alert v-model="errorBdmerPlatforms" class="alert" type="error">
+            {{ $t("ERROR_CONNECT_BDMER_PLATFORMS") }}
           </v-alert>
 
           <v-btn class="btn-go-back" color="primary" block @click="clear">{{ $t("GO_BACK_TO_SYNC") }}</v-btn>
         </div>
 
-        <div v-if="!isLoading && !errorOdk && !errorBdmer && !errorBdmerTable ">
+        <div v-if="!isLoading && !errorOdk && !errorBdmer && !errorBdmerSpecies && !errorBdmerPlatforms ">
           <v-alert v-model="alertSuccess" class="alert" type="success">
             {{success.length}} {{ $t("IMPORT_SUCCESS") }}
             <a @click="displaySuccess = !displaySuccess">{{ $t("DISPLAY_SUCCESS") }} </a>
@@ -125,7 +129,8 @@ export default {
 		displaySuccess: false,
 		isLoading: false,
 		errorBdmer: false,
-		errorBdmerTable: false,
+		errorBdmerSpecies: false,
+		errorBdmerPlatforms: false,
 		errorOdk: false,
 		headersErrors: [
 			{
@@ -174,9 +179,16 @@ export default {
 		);
 
 		this.$store.watch(
-			() => this.$store.getters["importation/hasErrorBdmerTable"],
+			() => this.$store.getters["importation/hasErrorBdmerSpecies"],
 			res => {
-				this.errorBdmerTable = res;
+				this.errorBdmerSpecies = res;
+			}
+		);
+
+		this.$store.watch(
+			() => this.$store.getters["importation/hasErrorBdmerPlatforms"],
+			res => {
+				this.errorBdmerPlatforms = res;
 			}
 		);
 

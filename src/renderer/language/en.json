@@ -34,5 +34,6 @@
 	"OFFLINE": "You are offline ! Reconnect to use application.",
 	"ERROR_CONNECT_ODK": "Connection to Seacusey impossible.",
 	"ERROR_CONNECT_BDMER": "Connection to Bdmer impossible.",
-	"ERROR_CONNECT_BDMER_TABLE": "It seems that the database you try to reach isn't formated properly."
+	"ERROR_CONNECT_BDMER_SPECIES": "It seems that the table species from the database Bdmer3 isn't formated properly or doesn't exist.",
+	"ERROR_CONNECT_BDMER_PLATFORMS": "It seems that the table platforms from the database Bdmer3 isn't formated properly or doesn't exist."
 }
