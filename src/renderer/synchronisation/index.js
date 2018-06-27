@@ -110,7 +110,7 @@ function synchronize(user) {
 												// If platform isn't found
 												if (platform.status === 404) {
 													errors.push({
-														error: data.data[0].META_INSTANCE_NAME.split("-")[0],
+														error: data.data[0].META_INSTANCE_NAME.split("-")[0].replace("_", " "),
 														msg: "Platform not found"
 													});
 													if (table === tables[tables.length - 1]) {
@@ -422,20 +422,27 @@ function checkPlatformExist(url, data) {
 		let db = new PouchDB(url + "/platforms", {
 			skip_setup: true
 		});
-
 		db.allDocs({
 			include_docs: true
 		})
 			.then(function(doc) {
 				let names = [];
 				for (let row of doc.rows) {
-					if (row.id.toUpperCase() === data.META_INSTANCE_NAME.split("-")[0].toUpperCase()) {
+					if (
+						row.id
+							.toUpperCase()
+							.replace("_", " ")
+							.replace("-", " ") ===
+						data.META_INSTANCE_NAME.split("-")[0]
+							.toUpperCase()
+							.replace("_", " ")
+					) {
 						resolve(row.doc);
 					}
 
 					if (row === doc.rows[doc.rows.length - 1]) {
 						resolve({
-							docId: data.META_INSTANCE_NAME.split("-")[0],
+							docId: data.META_INSTANCE_NAME.split("-")[0].replace("_", " "),
 							error: "not_found",
 							message: "missing",
 							name: "not_found",
