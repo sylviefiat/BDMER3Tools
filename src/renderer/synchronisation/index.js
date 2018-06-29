@@ -1,5 +1,5 @@
 import PouchDB from "pouchdb";
-import axios from "axios";
+import request from "request";
 
 export function seacuseyToBdmer(user) {
 	return new Promise((resolve, reject) => {
@@ -75,117 +75,143 @@ function synchronize(user) {
 	let end = false;
 
 	return new Promise((resolve, reject) => {
-		axios
-			.get(user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema)
-			.then(allTables => {
-				for (let table of allTables.data) {
-					if (table.name.startsWith("BUILD") && table.name.endsWith("CORE")) {
-						tables.push(table.name);
-					}
-				}
-
-				getAllSpecies(user.bdmer.url)
-					.then(species => {
-						for (let specie of species) {
-							let sp = {
-								code: specie.doc.code,
-								names: []
-							};
-
-							for (let name of specie.doc.names) {
-								sp.names.push(name.name.toLowerCase());
-							}
-							speciesBdmer.push(sp);
+		request(
+			user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema + "/",
+			{
+				auth: {
+					user: user.odk.username,
+					pass: user.odk.password
+				},
+				timeout: 10000
+			},
+			function(error, response, body) {
+				if (response) {
+					let allTables = JSON.parse(body);
+					for (let table of allTables) {
+						if (table.name.startsWith("BUILD") && table.name.endsWith("CORE")) {
+							tables.push(table.name);
 						}
+					}
 
-						for (let table of tables) {
-							axios
-								.get(user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema + "/" + table)
-								.then(data => {
-									// If the table isn't empty
-									if (data.data.length > 0) {
-										// Checking if the platform exist
-										checkPlatformExist(user.bdmer.url, data.data[0])
-											.then(platform => {
-												// If platform isn't found
-												if (platform.status === 404) {
-													errors.push({
-														error: data.data[0].META_INSTANCE_NAME.split("-")[0].replace("_", " "),
-														msg: "Platform not found"
-													});
-													if (table === tables[tables.length - 1]) {
-														resolve({ errors: errors, warnings: warnings, platforms: platforms });
-													}
-												} else {
-													// Browsing each row of the table
-													for (let row of data.data) {
-														// If we are at the last row of the last table
-														if (table === tables[tables.length - 1] && data.data[data.data.length - 1] === row) {
-															end = true;
-														}
-														let station = createStation(row, platform);
-														if (station.err) {
+					getAllSpecies(user.bdmer.url)
+						.then(species => {
+							for (let specie of species) {
+								let sp = {
+									code: specie.doc.code,
+									names: []
+								};
+
+								for (let name of specie.doc.names) {
+									sp.names.push(name.name.toLowerCase());
+								}
+								speciesBdmer.push(sp);
+							}
+
+							for (let table of tables) {
+								request(
+									user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema + "/" + table,
+									{
+										auth: {
+											user: user.odk.username,
+											pass: user.odk.password
+										},
+										timeout: 10000
+									},
+									function(error, response, body) {
+										if (response) {
+											let data = JSON.parse(body);
+											// If the table isn't empty
+											if (data.length > 0) {
+												// Checking if the platform exist
+												checkPlatformExist(user.bdmer.url, data[0])
+													.then(platform => {
+														// If platform isn't found
+														if (platform.status === 404) {
 															errors.push({
-																error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																msg: station.msg
+																error: data[0].META_INSTANCE_NAME.split("-")[0].replace("_", " "),
+																msg: "Platform not found"
 															});
-														} else if (station.warning) {
-															warnings.push({
-																warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																msg: station.msg
-															});
+															if (table === tables[tables.length - 1]) {
+																resolve({ errors: errors, warnings: warnings, platforms: platforms });
+															}
 														} else {
-															let survey = createSurvey(row, platform);
-															if (survey.err) {
-																errors.push({
-																	error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																	msg: survey.msg
-																});
-															} else if (survey.warning) {
-																warnings.push({
-																	warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																	msg: survey.msg
-																});
-															} else {
-																let count = createCount(row, platform, station, survey, speciesBdmer);
-																if (count.err) {
+															// Browsing each row of the table
+															for (let row of data) {
+																// If we are at the last row of the last table
+																if (table === tables[tables.length - 1] && data[data.length - 1] === row) {
+																	end = true;
+																}
+																let station = createStation(row, platform);
+																if (station.err) {
 																	errors.push({
 																		error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																		msg: count.msg
+																		msg: station.msg
+																	});
+																} else if (station.warning) {
+																	warnings.push({
+																		warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																		msg: station.msg
 																	});
 																} else {
-																	platform.stations.push(station);
-																	survey.counts.push(count);
-																	platform.surveys.push(survey);
-																	addPlatform = true;
-																	rows.push(row);
+																	let survey = createSurvey(row, platform);
+																	if (survey.err) {
+																		errors.push({
+																			error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																			msg: survey.msg
+																		});
+																	} else if (survey.warning) {
+																		warnings.push({
+																			warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																			msg: survey.msg
+																		});
+																	} else {
+																		let count = createCount(row, platform, station, survey, speciesBdmer);
+																		if (count.err) {
+																			errors.push({
+																				error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																				msg: count.msg
+																			});
+																		} else {
+																			platform.stations.push(station);
+																			survey.counts.push(count);
+																			platform.surveys.push(survey);
+																			addPlatform = true;
+																			rows.push(row);
+																		}
+																	}
 																}
 															}
+
+															// If we have a valid platform
+															if (addPlatform) {
+																platforms.push({ platform: platform, rows: rows });
+																addPlatform = false;
+																rows = [];
+															}
+
+															// If we browsed all the rows of the tables
+															if (end) {
+																resolve({ errors: errors, warnings: warnings, platforms: platforms });
+															}
 														}
-													}
-
-													// If we have a valid platform
-													if (addPlatform) {
-														platforms.push({ platform: platform, rows: rows });
-														addPlatform = false;
-														rows = [];
-													}
-
-													// If we browsed all the rows of the tables
-													if (end) {
-														resolve({ errors: errors, warnings: warnings, platforms: platforms });
-													}
-												}
-											})
-											.catch(err => reject({ err: err, type: "bdmer" }));
+													})
+													.catch(err => reject({ err: err, type: "bdmer" }));
+											}
+										}
+										if (error) {
+											reject({ err: error, type: "odk" });
+										}
 									}
-								})
-								.catch(err => reject({ err: err, type: "odk" }));
-						}
-					})
-					.catch(err => reject({ err: err, type: "bdmer" }));
-			})
-			.catch(err => reject({ err: err, type: "odk" }));
+								);
+							}
+						})
+						.catch(err => reject({ err: err, type: "bdmer" }));
+				}
+				if (error) {
+					reject({ err: error, type: "odk" });
+				}
+			}
+		);
 	});
 }
 
@@ -453,6 +479,8 @@ function checkPlatformExist(url, data) {
 				}
 			})
 			.catch(function(err) {
+				console.log(data);
+				console.log(err);
 				if (err.code === "ECONNREFUSED") {
 					reject({ err: err, type: "connection" });
 				} else {

@@ -1,4 +1,3 @@
-import axios from "axios";
 import router from "@/router";
 import store from "@/store";
 import Cookies from "js-cookie";
@@ -44,7 +43,7 @@ export default {
 			});
 		},
 		signinErrors: (state, data) => {
-			if (data.err.status === 400 || data.err.status === 500 || data.err.status === 404) {
+			if (data.status === 400 || data.status === 500 || data.status === 404 || !data.status) {
 				state.urlError = true;
 			} else {
 				state.authError = true;
@@ -93,7 +92,7 @@ export default {
 				})
 				.catch(err => {
 					console.log(err);
-					commit("signinErrors", { err: err, type: "Bdmer" });
+					commit("signinErrors", err);
 				});
 		},
 		signinODK: ({ commit }, user) => {
@@ -103,7 +102,7 @@ export default {
 					commit("signinODK", user);
 				})
 				.catch(err => {
-					commit("signinErrorsODK", { err: err, type: "ODK" });
+					commit("signinErrors", err);
 				});
 		},
 		resetAuthError: ({ commit }) => {

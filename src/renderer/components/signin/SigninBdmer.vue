@@ -117,6 +117,9 @@ export default {
 	},
 	methods: {
 		submit() {
+			if (!this.user.url.startsWith("http://") && !this.user.url.startsWith("https://")) {
+				this.user.url = "http://" + this.user.url;
+			}
 			this.$store.dispatch("auth/signinBdmer", this.user);
 		}
 	}

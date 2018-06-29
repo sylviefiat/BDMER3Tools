@@ -1,5 +1,4 @@
 import Vue from "vue";
-import axios from "axios";
 import Vuetify from "vuetify";
 import VueI18n from "vue-i18n";
 import Vuelidate from "vuelidate";
@@ -20,7 +19,6 @@ window.addEventListener("beforeunload", () => {
 });
 
 if (!process.env.IS_WEB) Vue.use(require("vue-electron"));
-Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
 Vue.use(Vuetify);

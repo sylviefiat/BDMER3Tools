@@ -1,24 +1,32 @@
-import axios from "axios";
 import PouchDB from "pouchdb";
 import PouchDBAuth from "pouchdb-authentication";
+import request from "request";
 
 PouchDB.plugin(PouchDBAuth);
 
 export function signinODK(user) {
 	return new Promise((resolve, reject) => {
-		axios
-			.get(user.url + "/" + user.dbConfiguration.db + "/" + user.dbConfiguration.schema)
-			.then(response => {
-				if (response === undefined) {
-					reject(false);
-				} else {
-					resolve(true);
+		request(
+			user.url + "/" + user.dbConfiguration.db + "/" + user.dbConfiguration.schema + "/",
+			{
+				auth: {
+					user: user.username,
+					pass: user.password
 				}
-			})
-			.catch(error => {
-				console.log(error);
-				reject(false);
-			});
+			},
+			function(error, response, body) {
+				if (response) {
+					if (response.statusCode === 200) {
+						resolve(response);
+					} else {
+						reject({ err: true, status: response.statusCode });
+					}
+				}
+				if (error) {
+					reject({ err: true, status: 404 });
+				}
+			}
+		);
 	});
 }
 
@@ -30,10 +38,8 @@ export function signinBdmer(user) {
 
 		db.logIn(user.username, user.password, (err, response) => {
 			if (err) {
-				console.log(err);
 				reject(err);
 			} else {
-				console.log(response);
 				resolve(response);
 			}
 		});

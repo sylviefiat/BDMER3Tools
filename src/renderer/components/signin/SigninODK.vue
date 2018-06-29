@@ -121,6 +121,9 @@ export default {
 	},
 	methods: {
 		submit() {
+			if (!this.user.url.startsWith("http://") && !this.user.url.startsWith("https://")) {
+				this.user.url = "http://" + this.user.url;
+			}
 			this.user.dbConfiguration = this.$store.getters["auth/getDbConfiguration"];
 			this.$store.dispatch("auth/signinODK", this.user);
 		}
