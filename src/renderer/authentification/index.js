@@ -12,7 +12,8 @@ export function signinODK(user) {
 				auth: {
 					user: user.username,
 					pass: user.password
-				}
+				},
+				timeout: 15000
 			},
 			function(error, response, body) {
 				if (response) {

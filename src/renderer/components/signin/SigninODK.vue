@@ -12,7 +12,7 @@
          v-model="user.url"
          label="Url "
          :error-messages="hasUrlError"
-         hint="ex: http://entropie-dev.ird.nc:3000"
+         hint="ex: http://bdmer3api.ird.nc"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
          required></v-text-field>

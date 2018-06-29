@@ -25,7 +25,6 @@
          @blur="$v.dbConfiguration.schema.$touch()"
          required></v-text-field>
 
-
           <v-btn block type="submit" :disabled="!isCompleted" class="primary" @click="submit">{{$t('SAVE')}}</v-btn>
           <v-btn flat small block to="home" color="red">{{$t('RETURN')}}</v-btn>
         </v-form>

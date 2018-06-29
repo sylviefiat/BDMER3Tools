@@ -82,7 +82,7 @@ function synchronize(user) {
 					user: user.odk.username,
 					pass: user.odk.password
 				},
-				timeout: 10000
+				timeout: 15000
 			},
 			function(error, response, body) {
 				if (response) {
@@ -115,7 +115,7 @@ function synchronize(user) {
 											user: user.odk.username,
 											pass: user.odk.password
 										},
-										timeout: 10000
+										timeout: 15000
 									},
 									function(error, response, body) {
 										if (response) {

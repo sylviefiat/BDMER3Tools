@@ -11,8 +11,8 @@
          prepend-icon="link"
          v-model="user.url"
          label="Url "
-         hint="ex: http://bdmer3.ird.nc:5984"
          :error-messages="hasUrlError"
+         hint="ex: http://bdmer3.ird.nc:5984"
          @input="$v.user.url.$touch()"
          @blur="$v.user.url.$touch()"
          required></v-text-field>
