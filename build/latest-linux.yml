@@ -1,9 +1,0 @@
-version: 1.0.8
-files:
-  - url: BDMER3Tools-1.0.8-x86_64.AppImage
-    sha512: G1TRGAmHDfgAf1NQ2T7+rYLF2qvu3ZK4ZK+yy9qzdTjIwdeRcfGmXJwUAfNT+bfHYw7vAOuk0dIS36bjM+NNSA==
-    size: 53002968
-    blockMapSize: 56348
-path: BDMER3Tools-1.0.8-x86_64.AppImage
-sha512: G1TRGAmHDfgAf1NQ2T7+rYLF2qvu3ZK4ZK+yy9qzdTjIwdeRcfGmXJwUAfNT+bfHYw7vAOuk0dIS36bjM+NNSA==
-releaseDate: '2018-06-29T01:02:55.839Z'
