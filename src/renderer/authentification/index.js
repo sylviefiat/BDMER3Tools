@@ -1,7 +1,6 @@
 import PouchDB from "pouchdb";
 import PouchDBAuth from "pouchdb-authentication";
 import request from "request";
-
 PouchDB.plugin(PouchDBAuth);
 
 export function signinODK(user) {
@@ -13,7 +12,7 @@ export function signinODK(user) {
 					user: user.username,
 					pass: user.password
 				},
-				timeout: 15000
+				timeout: 2000
 			},
 			function(error, response, body) {
 				if (response) {

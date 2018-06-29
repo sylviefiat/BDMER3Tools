@@ -80,7 +80,6 @@ export default {
 					commit("importSuccess", res);
 				})
 				.catch(err => {
-					console.log(err);
 					commit("importErr", err);
 				});
 		}

@@ -55,7 +55,8 @@
         <div v-if="!isLoading && !errorOdk && !errorBdmer && !errorBdmerSpecies && !errorBdmerPlatforms ">
           <v-alert v-model="alertSuccess" class="alert" type="success">
             {{success.length}} {{ $t("IMPORT_SUCCESS") }}
-            <a @click="displaySuccess = !displaySuccess">{{ $t("DISPLAY_SUCCESS") }} </a>
+            <a v-if="!displaySuccess" @click="displaySuccess = !displaySuccess">{{ $t("DISPLAY_SUCCESS") }} </a>
+            <a v-if="displaySuccess" @click="displaySuccess = !displaySuccess">{{ $t("HIDE_SUCCESS") }} </a>
           </v-alert>
 
           <v-data-table v-if="displaySuccess" :headers="headersSuccess" :items="success" class="elevation-1">
@@ -71,7 +72,9 @@
           <v-alert v-model="alertWarning" class="alert" type="warning">
             {{warnings.length}} {{ $t("IMPORT_WARNING") }}
 
-            <a @click="displayWarnings = !displayWarnings">{{ $t("DISPLAY_WARNING") }} </a>
+            <a v-if="!displayWarnings" @click="displayWarnings = !displayWarnings">{{ $t("DISPLAY_WARNING") }} </a>
+            <a v-if="displayWarnings" @click="displayWarnings = !displayWarnings">{{ $t("HIDE_WARNING") }} </a>
+
           </v-alert>
 
           <v-data-table v-if="displayWarnings" :headers="headersWarnings" :items="warnings" class="elevation-1">
@@ -86,9 +89,12 @@
 
           <v-alert v-model="alertFail" class="alert" type="error">
             {{ $t("IMPORT_FAIL") }}
+
+            <a v-if="!displayErrors" @click="displayErrors = !displayErrors">{{ $t("DISPLAY_ERRORS") }} </a>
+            <a v-if="displayErrors" @click="displayErrors = !displayErrors">{{ $t("HIDE_ERRORS") }} </a>
           </v-alert>
 
-          <v-data-table :headers="headersErrors" :items="errors" class="elevation-1">
+          <v-data-table v-if="alertFail && displayErrors" :headers="headersErrors" :items="errors" class="elevation-1">
             <template slot="items" slot-scope="props">
               <td>
                 {{props.item.error}}
@@ -127,6 +133,7 @@ export default {
 		success: [],
 		displayWarnings: false,
 		displaySuccess: false,
+		displayErrors: true,
 		isLoading: false,
 		errorBdmer: false,
 		errorBdmerSpecies: false,

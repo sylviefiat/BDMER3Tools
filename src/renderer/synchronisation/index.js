@@ -3,21 +3,27 @@ import request from "request";
 
 export function seacuseyToBdmer(user) {
 	return new Promise((resolve, reject) => {
-		synchronize(user)
-			.then(response => {
-				if (response.platforms.length > 0) {
-					updateBdmer(response.platforms, user).then(plat => {
-						for (let r of plat.errors) {
-							response.errors.push(r);
+		getTablesOdk(user.odk)
+			.then(tables => {
+				synchronize(user, tables)
+					.then(response => {
+						if (response.platforms.length > 0) {
+							updateBdmer(response.platforms, user).then(plat => {
+								for (let r of plat.errors) {
+									response.errors.push(r);
+								}
+								resolve({ errors: response.errors, warnings: response.warnings, success: plat.success });
+							});
+						} else {
+							resolve({ errors: response.errors, warnings: response.warnings, success: [] });
 						}
-						resolve({ errors: response.errors, warnings: response.warnings, success: plat.success });
+					})
+					.catch(err => {
+						reject(err);
 					});
-				} else {
-					resolve({ errors: response.errors, warnings: response.warnings, success: [] });
-				}
 			})
-			.catch(err => {
-				reject(err);
+			.catch(error => {
+				reject(error);
 			});
 	});
 }
@@ -60,12 +66,45 @@ function updateBdmer(platforms, user) {
 	});
 }
 
+function getTablesOdk(user) {
+	let tables = [];
+	return new Promise((resolve, reject) => {
+		request(
+			user.url + "/" + user.dbConfiguration.db + "/" + user.dbConfiguration.schema + "/",
+			{
+				auth: {
+					user: user.username,
+					pass: user.password
+				},
+				timeout: 2000
+			},
+			function(error, response, body) {
+				if (response) {
+					if (response.statusCode === 200) {
+						let allTables = JSON.parse(body);
+						for (let table of allTables) {
+							if (table.name.startsWith("BUILD") && table.name.endsWith("CORE")) {
+								tables.push(table.name);
+							}
+						}
+						resolve(tables);
+					} else {
+						reject({ err: true, status: response.statusCode });
+					}
+				}
+				if (error) {
+					reject({ err: true, status: 404 });
+				}
+			}
+		);
+	});
+}
+
 /*
 	Synchronisation between Seacusey Survey and BDMER3
 	user: information from the user
 */
-function synchronize(user) {
-	let tables = [];
+function synchronize(user, tables) {
 	let warnings = [];
 	let platforms = [];
 	let errors = [];
@@ -75,143 +114,120 @@ function synchronize(user) {
 	let end = false;
 
 	return new Promise((resolve, reject) => {
-		request(
-			user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema + "/",
-			{
-				auth: {
-					user: user.odk.username,
-					pass: user.odk.password
-				},
-				timeout: 15000
-			},
-			function(error, response, body) {
-				if (response) {
-					let allTables = JSON.parse(body);
-					for (let table of allTables) {
-						if (table.name.startsWith("BUILD") && table.name.endsWith("CORE")) {
-							tables.push(table.name);
-						}
+		getAllSpecies(user.bdmer.url)
+			.then(species => {
+				for (let specie of species) {
+					let sp = {
+						code: specie.doc.code,
+						names: []
+					};
+
+					for (let name of specie.doc.names) {
+						sp.names.push(name.name.toLowerCase());
 					}
+					speciesBdmer.push(sp);
+				}
 
-					getAllSpecies(user.bdmer.url)
-						.then(species => {
-							for (let specie of species) {
-								let sp = {
-									code: specie.doc.code,
-									names: []
-								};
-
-								for (let name of specie.doc.names) {
-									sp.names.push(name.name.toLowerCase());
-								}
-								speciesBdmer.push(sp);
-							}
-
-							for (let table of tables) {
-								request(
-									user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema + "/" + table,
-									{
-										auth: {
-											user: user.odk.username,
-											pass: user.odk.password
-										},
-										timeout: 15000
-									},
-									function(error, response, body) {
-										if (response) {
-											let data = JSON.parse(body);
-											// If the table isn't empty
-											if (data.length > 0) {
-												// Checking if the platform exist
-												checkPlatformExist(user.bdmer.url, data[0])
-													.then(platform => {
-														// If platform isn't found
-														if (platform.status === 404) {
+				for (let table of tables) {
+					request(
+						user.odk.url + "/" + user.odk.dbConfiguration.db + "/" + user.odk.dbConfiguration.schema + "/" + table,
+						{
+							auth: {
+								user: user.odk.username,
+								pass: user.odk.password,
+								sendImmediately: false
+							},
+							timeout: 2000
+						},
+						function(error, response, body) {
+							if (response) {
+								let data = JSON.parse(body);
+								// If the table isn't empty
+								if (data.length > 0) {
+									// Checking if the platform exist
+									checkPlatformExist(user.bdmer.url, data[0])
+										.then(platform => {
+											// If platform isn't found
+											if (platform.status === 404) {
+												errors.push({
+													error: data[0].META_INSTANCE_NAME.split("-")[0].replace("_", " "),
+													msg: "Platform not found"
+												});
+												if (table === tables[tables.length - 1]) {
+													resolve({ errors: errors, warnings: warnings, platforms: platforms });
+												}
+											} else {
+												// Browsing each row of the table
+												for (let row of data) {
+													// If we are at the last row of the last table
+													if (table === tables[tables.length - 1] && data[data.length - 1] === row) {
+														end = true;
+													}
+													let station = createStation(row, platform);
+													if (station.err) {
+														errors.push({
+															error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+															msg: station.msg
+														});
+													} else if (station.warning) {
+														warnings.push({
+															warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+															msg: station.msg
+														});
+													} else {
+														let survey = createSurvey(row, platform);
+														if (survey.err) {
 															errors.push({
-																error: data[0].META_INSTANCE_NAME.split("-")[0].replace("_", " "),
-																msg: "Platform not found"
+																error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																msg: survey.msg
 															});
-															if (table === tables[tables.length - 1]) {
-																resolve({ errors: errors, warnings: warnings, platforms: platforms });
-															}
+														} else if (survey.warning) {
+															warnings.push({
+																warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																msg: survey.msg
+															});
 														} else {
-															// Browsing each row of the table
-															for (let row of data) {
-																// If we are at the last row of the last table
-																if (table === tables[tables.length - 1] && data[data.length - 1] === row) {
-																	end = true;
-																}
-																let station = createStation(row, platform);
-																if (station.err) {
-																	errors.push({
-																		error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																		msg: station.msg
-																	});
-																} else if (station.warning) {
-																	warnings.push({
-																		warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																		msg: station.msg
-																	});
-																} else {
-																	let survey = createSurvey(row, platform);
-																	if (survey.err) {
-																		errors.push({
-																			error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																			msg: survey.msg
-																		});
-																	} else if (survey.warning) {
-																		warnings.push({
-																			warning: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																			msg: survey.msg
-																		});
-																	} else {
-																		let count = createCount(row, platform, station, survey, speciesBdmer);
-																		if (count.err) {
-																			errors.push({
-																				error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
-																				msg: count.msg
-																			});
-																		} else {
-																			platform.stations.push(station);
-																			survey.counts.push(count);
-																			platform.surveys.push(survey);
-																			addPlatform = true;
-																			rows.push(row);
-																		}
-																	}
-																}
-															}
-
-															// If we have a valid platform
-															if (addPlatform) {
-																platforms.push({ platform: platform, rows: rows });
-																addPlatform = false;
-																rows = [];
-															}
-
-															// If we browsed all the rows of the tables
-															if (end) {
-																resolve({ errors: errors, warnings: warnings, platforms: platforms });
+															let count = createCount(row, platform, station, survey, speciesBdmer);
+															if (count.err) {
+																errors.push({
+																	error: row.META_INSTANCE_NAME === null || row.META_INSTANCE_NAME === "" ? "No identifier" : row.META_INSTANCE_NAME,
+																	msg: count.msg
+																});
+															} else {
+																platform.stations.push(station);
+																survey.counts.push(count);
+																platform.surveys.push(survey);
+																addPlatform = true;
+																rows.push(row);
 															}
 														}
-													})
-													.catch(err => reject({ err: err, type: "bdmer" }));
+													}
+												}
+
+												// If we have a valid platform
+												if (addPlatform) {
+													platforms.push({ platform: platform, rows: rows });
+													addPlatform = false;
+													rows = [];
+												}
+
+												// If we browsed all the rows of the tables
+												if (end) {
+													resolve({ errors: errors, warnings: warnings, platforms: platforms });
+												}
 											}
-										}
-										if (error) {
-											reject({ err: error, type: "odk" });
-										}
-									}
-								);
+										})
+										.catch(err => reject({ err: err, type: "bdmer" }));
+								}
 							}
-						})
-						.catch(err => reject({ err: err, type: "bdmer" }));
+							if (error) {
+								reject({ err: error, type: "odk" });
+							}
+						}
+					);
 				}
-				if (error) {
-					reject({ err: error, type: "odk" });
-				}
-			}
-		);
+			})
+			.catch(err => reject({ err: err, type: "bdmer" }));
 	});
 }
 
@@ -479,8 +495,6 @@ function checkPlatformExist(url, data) {
 				}
 			})
 			.catch(function(err) {
-				console.log(data);
-				console.log(err);
 				if (err.code === "ECONNREFUSED") {
 					reject({ err: err, type: "connection" });
 				} else {
